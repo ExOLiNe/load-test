@@ -1,3 +1,4 @@
+use std::cmp::min;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use log::{debug, warn};
@@ -116,7 +117,6 @@ impl Connection {
                                 sender.send(body).await?;
                             }
                             HttpEntity::End => {
-                                // debug!("end");
                                 break
                             }
                         }

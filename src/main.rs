@@ -35,7 +35,6 @@ async fn main() -> Result<(), Error> {
             handles.push(tokio::spawn(async move {
                 for _ in 0..requests_per_connection {
                     let response = client.perform_request(&url, ready_request.clone()).await?;
-                    debug!("Connect: {}", i);
                     if let Some(mut body_reader) = response.body_reader {
                         loop {
                             if let Some(buf) = body_reader.recv().await {

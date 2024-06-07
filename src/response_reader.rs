@@ -3,12 +3,11 @@ use std::fs::File;
 use std::io::Write;
 
 use bytes::BytesMut;
-use log::debug;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt};
 
 use crate::error::{CommonError, Error};
 use crate::header::HttpHeader;
-use crate::response_reader::ResponseBodyType::Plain;
+use crate::response_reader::ResponseBodyType::{Chunked, Plain};
 use crate::utils::NEWLINE;
 
 #[derive(Clone)]
@@ -98,7 +97,7 @@ where T : AsyncBufReadExt + Unpin
                                 self.response_body_type = Plain((0, content_length));
                             }
                             if header_parsed.name == "Transfer-Encoding" && header_parsed.value == "chunked" {
-                                self.response_body_type = ResponseBodyType::Chunked;
+                                self.response_body_type = Chunked;
                             }
                             Ok(HttpEntity::Header(header_parsed))
                         }
@@ -107,7 +106,7 @@ where T : AsyncBufReadExt + Unpin
                 }
             }
             ReaderState::ReadingBody => {
-                self.read_body().await.map(|str| {
+                self.read_body_next().await.map(|str| {
                     str.map_or(HttpEntity::End, |str| {
                         HttpEntity::Body(str)
                     })
@@ -116,7 +115,7 @@ where T : AsyncBufReadExt + Unpin
         }
     }
 
-    async fn read_body(&mut self) -> Result<Option<String>, Error> {
+    async fn read_body_next(&mut self) -> Result<Option<String>, Error> {
         match self.response_body_type {
             Plain((mut already_read, content_length)) => {
                 let to_read = content_length - already_read;
@@ -142,41 +141,32 @@ where T : AsyncBufReadExt + Unpin
                     }
                 }
             }
-            ResponseBodyType::Chunked => {
-                let mut buf = String::with_capacity(65535);
-                let mut body_result_buf = String::with_capacity(65535);
-                let mut read_body_size = true;
-                loop {
-                    match self.reader.read_line(&mut buf).await {
-                        Ok(_) => {
-                            let buf_slice = buf.trim();
-                            if read_body_size {
-                                if buf_slice.len() > 0 {
-                                    let chunk_size = usize::from_str_radix(buf_slice, 16).map_err(|err| {
-                                        panic!();
-                                    }).unwrap();
-                                    if chunk_size == 0 {
-                                        break;
-                                    } else {
-                                        let to_reserve = max(chunk_size as i32 - buf.capacity() as i32, 0) as usize;
-                                        if to_reserve > 0 {
-                                            buf.reserve(to_reserve);
-                                        }
-                                    }
-                                }
-                            } else {
-                                body_result_buf += &buf_slice;
+            Chunked => {
+                let mut buf = String::new();
+                {
+                    self.reader.read_line(&mut buf).await?;
+                    let buf_slice = buf.trim();
+                    if buf_slice.len() > 0 {
+                        let chunk_size = usize::from_str_radix(buf_slice, 16)?;
+                        if chunk_size == 0 {
+                            return Ok(None)
+                        } else {
+                            let to_reserve = max(chunk_size as i32 - buf.capacity() as i32, 0) as usize;
+                            if to_reserve > 0 {
+                                buf.reserve(to_reserve);
                             }
-                            buf.clear();
-                            read_body_size = !read_body_size;
-                        },
-                        Err(err) => {
-                            panic!("{}", err);
                         }
-                    };
+                    }
+                    buf.clear();
                 }
-
-                return Ok(Some(body_result_buf));
+                match self.reader.read_line(&mut buf).await {
+                    Ok(_) => {
+                        return Ok(Some(buf.trim().to_owned()));
+                    },
+                    Err(err) => {
+                        panic!("{}", err);
+                    }
+                }
             }
         }
     }
