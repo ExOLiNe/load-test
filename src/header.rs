@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub struct HttpHeader {
@@ -6,15 +7,20 @@ pub struct HttpHeader {
     pub value: String
 }
 
+impl Display for HttpHeader {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("{}: {}", self.name, self.value).as_str())
+    }
+}
+
 impl TryFrom<String> for HttpHeader {
-    type Error = ();
+    type Error = crate::error::Error;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let parts: Vec<&str> = value.splitn(2, ": ").collect();
-        let name = *parts.get(0).unwrap();
-        let value = *parts.get(1).unwrap();
+        let name = *parts.get(0).ok_or(Self::Error::HeaderParse("Parsing error"))?;
+        let value = *parts.get(1).ok_or(Self::Error::HeaderParse("Parsing error"))?;
         let value = &value[..value.len() - 2];
         Ok(HttpHeader {
-            // todo replace unwrap with ?
             name: String::from(name),
             value: String::from(value)
         })

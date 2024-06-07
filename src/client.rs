@@ -1,13 +1,11 @@
 use std::collections::HashMap;
-use std::net::SocketAddrV4;
-use std::str::FromStr;
 use std::sync::Arc;
 
 use tokio::sync::mpsc::Receiver;
 use url::Url;
 
-use crate::connection::Connection;
-use crate::error::{CommonError, Error};
+use crate::connection::{Connection, ConnectionOptions};
+use crate::error::{Error};
 use crate::header::HttpHeader;
 use crate::request::ReadyRequest;
 
@@ -29,7 +27,7 @@ impl Default for Response {
 }
 
 pub struct HttpClient {
-    connections: HashMap<String, Vec<Connection>>
+    connections: HashMap<String, Connection>
 }
 
 impl HttpClient {
@@ -46,59 +44,28 @@ impl HttpClient {
     ) -> Result<Response, Error> {
         let scheme = url.scheme();
         let host = url.host().expect("There must be domain").to_string();
+        let use_tls = scheme == "https";
         let port = url.port().unwrap_or_else(|| {
-            if scheme == "https://" {
+            if use_tls {
                 443u16
             } else {
                 80u16
             }
         });
 
-        let connection = match self.find_connection(host.as_str()).await {
-            Some(conn) => conn,
-            None => {
-                let url = SocketAddrV4::from_str(
-                    format!("{}:{}", host, port).as_str()
-                ).map_err(|err| {
-                    Error::OwnError(CommonError { reason: err.to_string() })
-                })?;
-                self.create_new_connection(url).await?;
-                self.find_connection(host.as_str()).await.expect("Unexpected error")
-            }
+        let url = format!("{}:{}", host, port);
+        let url = url.as_str();
+
+        let connection = if let Some(connection) = self.connections.get_mut(url) {
+            connection
+        } else {
+            self.connections.insert(
+                url.to_string(),
+                Connection::new(host.as_str(), port, use_tls, ConnectionOptions::default()).await?
+            );
+            self.connections.get_mut(url).expect("Invalid state")
         };
 
-        connection.write_request(request).await.unwrap();
-        let response = connection.read_response().await.unwrap();
-        Ok(response)
-    }
-
-    async fn find_connection(&mut self, host: &str) -> Option<&mut Connection> {
-        return if let Some(pool) = self.connections.get_mut(host) {
-            for connection in pool {
-                if !*connection.in_progress.lock().await {
-                    return Some(connection)
-                }
-            }
-            None
-        } else {
-            None
-        }
-    }
-
-    #[async_backtrace::framed]
-    async fn create_new_connection(&mut self, addr: SocketAddrV4) -> Result<(), Error> {
-        let new_connection = Connection::new(addr).await?;
-        let host: String = addr.ip().to_string();
-        let connections_by_host = self.connections.get_mut(&host);
-        match connections_by_host {
-            Some(connections) => connections.push(new_connection),
-            None => {
-                assert!(self.connections.insert(host.clone(), vec![new_connection]).is_none());
-                self.connections.get(host.as_str()).ok_or_else(|| {
-                    Error::OwnError(CommonError { reason: String::from("Unexpected behaviour") })
-                })?;
-            }
-        }
-        Ok(())
+        Ok(connection.send_request(request).await?)
     }
 }

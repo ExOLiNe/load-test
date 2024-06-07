@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 use std::pin::Pin;
-use std::str::Chars;
-use strum_macros::Display;
+use std::rc::Rc;
+use std::sync::Arc;
+
+use strum_macros::{Display, EnumString};
 use url::Url;
 
-#[derive(Display)]
+use crate::utils::NEWLINE;
+
+#[derive(Display, Debug, PartialEq, EnumString)]
 pub enum Method {
     GET,
     POST,
@@ -14,38 +18,43 @@ pub enum Method {
     HEAD
 }
 
-pub struct Request<'a> {
+pub(crate) type BodyType = Option<Arc<Pin<Box<String>>>>;
+
+pub struct Request {
     pub method: Method,
     pub url: Url,
     pub headers: HashMap<String, String>,
-    pub body: Chars<'a>
+    pub body: BodyType
 }
 
-pub(crate) type ReadyRequest = (Pin<Box<String>>, Pin<Box<String>>);
+pub(crate) type ReadyRequest = (Pin<Box<String>>, BodyType);
 
-impl Request<'_> {
+impl Request {
     #[async_backtrace::framed]
     pub async fn get_raw(&mut self) -> ReadyRequest {
-        let body: Pin<Box<String>> = Pin::new(Box::new(self.body.by_ref().collect()));
+        /*let body: Option<Pin<Box<String>>> = self.body.as_mut().map(|mut body| {
+            Pin::new(Box::new(body.by_ref().collect()))
+        });*/
         let mut lines = Vec::new();
-        println!("{}", self.url.path());
-        println!("{}", self.url.authority());
         let query = &self.url.query().map_or_else(|| {
             self.url.path().to_owned()
         }, |q|{
             format!("{}?{}", &self.url.path(), q)
         });
-        println!("{}", query);
         lines.push(format!("{} {} HTTP/1.1", &self.method, query));
-        lines.push(format!("Host: {}", &self.url.host().unwrap()));
+        lines.push(format!("Host: {}", &self.url.host().expect("Invalid host")));
         self.headers.iter().for_each(|(name, value)|{
             lines.push(format!("{}: {}", name, value));
         });
-        lines.push(format!("Content-Length: {}", body.len()));
+        let body_len = match &self.body {
+            Some(body) => body.len(),
+            None => 0
+        };
+        lines.push(format!("Content-Length: {}", body_len));
         lines.push(String::from(""));
         lines.push(String::from(""));
-        let headers_raw = Pin::new(Box::new(lines.join("\n")));
-        println!("{}", headers_raw);
-        (headers_raw, body)
+
+        let headers_raw = Pin::new(Box::new(lines.join(NEWLINE)));
+        (headers_raw, self.body.clone())
     }
 }

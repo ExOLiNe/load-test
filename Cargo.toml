@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 clippy = "0.0.302"
+native-tls = "0.2.12"
 tokio = { version = "1.37.0", features = ["full"]}
 tokio-stream = "0.1.15"
+tokio-native-tls = "0.3.1"
 url = "2.5.0"
 futures = "0.3.30"
 async-backtrace = "0.2.7"
@@ -14,5 +16,12 @@ bytes = "1.6.0"
 strum = "0.26"
 strum_macros = "0.26.2"
 tokio-util = { version = "0.7.11", features = ["codec"] }
-#tracing = "0.1.40"
-#tracing-subscriber = "0.3.18"
+env_logger = "0.11.3"
+log = "0.4.21"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+serde_yaml = "0.9.33"
+
+[lib]
+name = "http_client"
+path = "src/lib.rs"
