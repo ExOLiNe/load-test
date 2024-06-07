@@ -1,0 +1,8 @@
+- request:
+    query: https://localhost/path/to?param1=val1&param2=val2
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: some_file.json
+  repeats: 1000
+  max_connections: 10
