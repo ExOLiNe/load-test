@@ -71,6 +71,7 @@ impl Connection {
         let mut response = Response::default();
         {
             let mut reader = reader.lock().await;
+            reader.reset();
             loop {
                 match reader.next_entity().await {
                     Ok(value) => {
@@ -129,6 +130,7 @@ impl Connection {
             reader.reset();
             let mut in_progress = in_progress.lock().await;
             *in_progress = false;
+            debug!("task");
             Ok::<(), Error>(())
         });
 

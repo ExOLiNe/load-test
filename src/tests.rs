@@ -9,7 +9,7 @@ mod tests {
     use crate::client::{HttpClient, Response};
     use crate::error::Error;
     use crate::header::HttpHeader;
-    use crate::load_test_request::{LoadTestRequest};
+    use crate::load_test_request::{DIR_STR, LoadTestRequest};
     use crate::request::{Request};
     use crate::response_reader::HttpResponseReader;
     use crate::utils::NEWLINE;
@@ -19,7 +19,7 @@ mod tests {
         env_logger::init();
 
         let data: Vec<LoadTestRequest> = serde_yaml::from_str(
-            read_to_string("D:\\RustroverProjects\\http_client\\test_data\\request\\request.yml").await?.as_mut_str()
+            read_to_string(format!("{}\\test_data\\request\\request.yml", DIR_STR)).await?.as_mut_str()
         )?;
 
         for req_data in data {
@@ -64,22 +64,6 @@ mod tests {
 
             info!("Time spent: {}", after.duration_since(before)?.as_secs());
         }
-
-        /*let connections = 20;
-        let requests_per_connection = 150;
-        let mut headers = HashMap::new();
-        headers.insert(String::from("X-Profile-Id"), String::from("000001"));
-        headers.insert(String::from("X-Session-Id"), String::from("000001"));
-        headers.insert(String::from("Content-Type"), String::from("application/json"));
-
-        let profile = read_to_string("D:\\RustroverProjects\\http_client\\body.json").await.unwrap();
-
-        let mut request = Request {
-            method: Method::POST,
-            url: "http://127.0.0.1:8081/v1/test?profileVersion=1.0.0&commitId=1000".parse().expect("Invalid url"),
-            headers: headers,
-            body: profile.chars()
-        };*/
         Ok(())
     }
 

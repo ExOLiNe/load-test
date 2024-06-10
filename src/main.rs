@@ -6,15 +6,24 @@ use log::{debug, info};
 use tokio::fs::read_to_string;
 use http_client::client::HttpClient;
 use http_client::error::Error;
-use http_client::load_test_request::LoadTestRequest;
+use http_client::load_test_request::{DIRECTORY, LoadTestRequest};
 use http_client::request::Request;
+use http_client::utils::STATISTICS;
+
+// #[global_allocator]
+// static ALLOC: tracy::GlobalAllocator = tracy::GlobalAllocator::new();
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    env_logger::init();
+    env_logger::builder().format_timestamp_millis().init();
+
+    let mut dir = DIRECTORY.clone();
+    dir.push("test_data");
+    dir.push("request");
+    dir.push("request.yml");
 
     let data: Vec<LoadTestRequest> = serde_yaml::from_str(
-        read_to_string("D:\\RustroverProjects\\http_client\\test_data\\request\\request.yml").await?.as_mut_str()
+        read_to_string(dir.to_str().unwrap()).await?.as_mut_str()
     )?;
 
     for req_data in data {
@@ -27,6 +36,7 @@ async fn main() -> Result<(), Error> {
         let mut handles = Vec::with_capacity(req_data.max_connections);
 
         let before = std::time::SystemTime::now();
+        debug!("Start");
 
         for i in 0..req_data.max_connections {
             let mut client = HttpClient::new().await;
@@ -38,7 +48,7 @@ async fn main() -> Result<(), Error> {
                     if let Some(mut body_reader) = response.body_reader {
                         loop {
                             if let Some(buf) = body_reader.recv().await {
-                                debug!("{}", buf);
+                                // debug!("{}", buf);
                             } else {
                                 break;
                             }
@@ -52,9 +62,8 @@ async fn main() -> Result<(), Error> {
 
         future::join_all(handles).await;
 
-        let after = std::time::SystemTime::now();
-
-        println!("Time spent: {}", after.duration_since(before)?.as_millis());
+        println!("Time spent: {}", before.elapsed().unwrap().as_millis());
     }
+    STATISTICS.lock().await.print();
     Ok(())
 }

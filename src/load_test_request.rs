@@ -1,13 +1,27 @@
 use std::collections::HashMap;
 use std::fs;
+use std::fs::File;
+use std::path::PathBuf;
 use std::pin::Pin;
-use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
+use lazy_static::lazy_static;
+
 use serde::{Deserialize, Deserializer};
 use url::Url;
+
 use crate::error::Error;
 use crate::request::{BodyType, Method, Request};
+
+#[cfg(target_os = "linux")]
+const DIR_STR: &str = "/mnt/d/RustroverProjects/http_client/";
+
+#[cfg(target_os = "windows")]
+const DIR_STR: &str = "D:\\RustroverProjects\\http_client\\";
+
+lazy_static! {
+    pub static ref DIRECTORY: PathBuf = PathBuf::from(DIR_STR);
+}
 
 #[derive(Deserialize, Debug)]
 pub struct LoadTestRequest {
@@ -44,9 +58,7 @@ D: Deserializer<'de>,
 {
     Deserialize::deserialize(deserializer).map(|file_path: Option<String>| {
         file_path.map(|file_path| {
-            Arc::new(Pin::new(Box::new(fs::read_to_string(format!("D:\\RustroverProjects\\http_client\\test_data\\body\\{}", file_path)).unwrap())))
+            Arc::new(Pin::new(Box::new(fs::read_to_string(format!("{}\\test_data\\body\\{}", DIR_STR, file_path)).unwrap())))
         })
     })
-    /*let file_path = String::deserialize(deserializer)?;
-    fs::read_to_string(format!("D:\\RustroverProjects\\http_client\\test_data\\body\\{}", &file_path)).map_err(serde::de::Error::custom)*/
 }
