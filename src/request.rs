@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::pin::Pin;
-use std::rc::Rc;
 use std::sync::Arc;
 
 use strum_macros::{Display, EnumString};
@@ -30,7 +29,6 @@ pub struct Request {
 pub(crate) type ReadyRequest = (Pin<Box<String>>, BodyType);
 
 impl Request {
-    #[async_backtrace::framed]
     pub async fn get_raw(&mut self) -> ReadyRequest {
         /*let body: Option<Pin<Box<String>>> = self.body.as_mut().map(|mut body| {
             Pin::new(Box::new(body.by_ref().collect()))

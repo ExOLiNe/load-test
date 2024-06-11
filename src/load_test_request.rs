@@ -1,27 +1,25 @@
 use std::collections::HashMap;
 use std::fs;
-use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::str::FromStr;
 use std::sync::Arc;
-use lazy_static::lazy_static;
 
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize};
 use url::Url;
 
 use crate::error::Error;
-use crate::request::{BodyType, Method, Request};
+use crate::request::{Method, Request};
 
-#[cfg(target_os = "linux")]
+/*#[cfg(target_os = "linux")]
 const DIR_STR: &str = "/mnt/d/RustroverProjects/http_client/";
 
 #[cfg(target_os = "windows")]
-const DIR_STR: &str = "D:\\RustroverProjects\\http_client\\";
+const DIR_STR: &str = "D:\\RustroverProjects\\http_client\\";*/
 
-lazy_static! {
+/*lazy_static! {
     pub static ref DIRECTORY: PathBuf = PathBuf::from(DIR_STR);
-}
+}*/
 
 #[derive(Deserialize, Debug)]
 pub struct LoadTestRequest {
@@ -35,24 +33,25 @@ pub struct RequestData {
     pub query: String,
     pub method: String,
     pub headers: HashMap<String, String>,
-    #[serde(deserialize_with = "deserialize_file_to_string")]
-    pub body: BodyType
+    pub body: Option<PathBuf>
 }
 
-impl <'a>TryInto<Request> for &'a RequestData {
-    type Error = Error;
-
-    fn try_into(self) -> Result<Request, Self::Error> {
-        Ok(Request {
-            method: Method::from_str(&self.method)?,
-            url: Url::parse(&self.query)?,
-            headers: self.headers.clone(),
-            body: self.body.clone()
+pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request, Error> {
+    Ok(Request {
+        method: Method::from_str(&data.method)?,
+        url: Url::parse(&data.query)?,
+        headers: data.headers.clone(),
+        body: data.body.clone().map(|body| {
+            read_to_body(working_dir.join("body").join(body)).unwrap()
         })
-    }
+    })
 }
 
-fn deserialize_file_to_string<'de, D>(deserializer: D) -> Result<BodyType, D::Error>
+pub(crate) fn read_to_body(path: PathBuf) -> Result<Arc<Pin<Box<String>>>, Error> {
+    Ok(Arc::new(Pin::new(Box::new(fs::read_to_string(path)?))))
+}
+
+/*fn deserialize_file_to_string<'de, D>(deserializer: D) -> Result<BodyType, D::Error>
 where
 D: Deserializer<'de>,
 {
@@ -61,4 +60,4 @@ D: Deserializer<'de>,
             Arc::new(Pin::new(Box::new(fs::read_to_string(format!("{}\\test_data\\body\\{}", DIR_STR, file_path)).unwrap())))
         })
     })
-}
+}*/

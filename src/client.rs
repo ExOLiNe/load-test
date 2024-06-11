@@ -9,21 +9,11 @@ use crate::error::{Error};
 use crate::header::HttpHeader;
 use crate::request::ReadyRequest;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Response {
     pub status: u32,
     pub headers: Vec<HttpHeader>,
     pub body_reader: Option<Receiver<String>>
-}
-
-impl Default for Response {
-    fn default() -> Self {
-        Response {
-            status: 0,
-            headers: Vec::new(),
-            body_reader: None
-        }
-    }
 }
 
 pub struct HttpClient {
@@ -31,12 +21,10 @@ pub struct HttpClient {
 }
 
 impl HttpClient {
-    #[async_backtrace::framed]
     pub async fn new() -> HttpClient {
         HttpClient { connections: HashMap::new() }
     }
 
-    #[async_backtrace::framed]
     pub async fn perform_request(
         &mut self,
         url: &Url,
@@ -45,7 +33,7 @@ impl HttpClient {
         let scheme = url.scheme();
         let host = url.host().expect("There must be domain").to_string();
         let use_tls = scheme == "https";
-        let port = url.port().unwrap_or_else(|| {
+        let port = url.port().unwrap_or({
             if use_tls {
                 443u16
             } else {
@@ -66,6 +54,6 @@ impl HttpClient {
             self.connections.get_mut(url).expect("Invalid state")
         };
 
-        Ok(connection.send_request(request).await?)
+        connection.send_request(request).await
     }
 }

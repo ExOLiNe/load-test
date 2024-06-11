@@ -1,0 +1,4408 @@
+{
+  "id": "6d3a5ba0-4a6a-4e7a-804c-8b2bba93be76",
+  "projectName": "cd",
+  "serviceName": "profile",
+  "environment": "TEST",
+  "swaggerUrl": "",
+  "openApi": {
+    "openapi": "3.0.1",
+    "info": {
+      "version": "unspecified"
+    },
+    "servers": [
+      {
+        "url": "https://test-cd.mytonagames.com/profile"
+      }
+    ],
+    "paths": {
+      "/api/command/{command}": {
+        "delete": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Clear SPECIFIED command which client already perform",
+          "operationId": "clearCommand",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "command",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/command": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Get commands which client should perform",
+          "operationId": "getCommands",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Set commands for client",
+          "operationId": "createCommands",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Clear ALL commands which client already perform",
+          "operationId": "clearCommands",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/{playerId}/criteria": {
+        "post": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Get player progress by id",
+          "operationId": "criteriaCheck",
+          "parameters": [
+            {
+              "name": "playerId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/JsonNode"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/{id}": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Get Profile by id",
+          "operationId": "get",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "isSupportId",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SearchResult"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "/api"
+          ],
+          "description": "update progress to server",
+          "operationId": "update",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "player's progress/profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommitResult"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "/api"
+          ],
+          "summary": "Delete profile by id without mark",
+          "operationId": "delete",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Profile deleted"
+            },
+            "404": {
+              "description": "Profile not found"
+            }
+          }
+        }
+      },
+      "/api/{id}/tags/{tag}": {
+        "delete": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "deleteTag",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "tag",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/{id}/mark": {
+        "delete": {
+          "tags": [
+            "/api"
+          ],
+          "summary": "Delete profile by id with mark",
+          "operationId": "deleteWithMark",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "forceTemporaryCopy",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Profile deleted"
+            },
+            "404": {
+              "description": "Profile not found"
+            }
+          }
+        }
+      },
+      "/api/jwt": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "generateJwt",
+          "parameters": [
+            {
+              "name": "sub",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "text/plain": {}
+              }
+            }
+          }
+        }
+      },
+      "/api": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Get Profile list filtered by search fields values",
+          "operationId": "get_1",
+          "parameters": [
+            {
+              "name": "page",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 100
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/deleted/pd/{id}": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "summary": "Get Deleted Profile PD by id",
+          "operationId": "getDeletedProfilePD",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Ok"
+            },
+            "404": {
+              "description": "Profile not found"
+            }
+          }
+        }
+      },
+      "/api/deleted": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Get Deleted Profile list filtered by search fields values",
+          "operationId": "getDeletedProfiles",
+          "parameters": [
+            {
+              "name": "page",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 100
+              }
+            },
+            {
+              "name": "withPDOnly",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/searchFields": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "getSearchFields",
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/DashboardSearchField"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/searchFieldsDeletedProfiles": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "getSearchFieldsForDeletedProfiles",
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/DashboardSearchField"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/sync/{id}": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "getSyncs",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Registration"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/tags": {
+        "get": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Get players tags. playerIds are string splitted by comma",
+          "operationId": "getTags",
+          "parameters": [
+            {
+              "name": "playerIds",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/JsonNode"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Put players tags",
+          "operationId": "putTags",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/ValueNode"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/resync": {
+        "put": {
+          "tags": [
+            "/api"
+          ],
+          "description": "Move syncs from {from} to {to}",
+          "operationId": "moveSyncs",
+          "parameters": [
+            {
+              "name": "from",
+              "in": "query",
+              "description": "from which ID move sync",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "to",
+              "in": "query",
+              "description": "to which ID move sync",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "syncTypes",
+              "in": "query",
+              "description": "syncTypes divided by comma",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api/{id}/progress": {
+        "patch": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "patch",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "player's progress/profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectNode"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommitResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/tags/csv": {
+        "post": {
+          "tags": [
+            "/api"
+          ],
+          "summary": "Put players tags from CSV file",
+          "description": "Line format: `playerId,tag_name,tag_value`. Has 2000 lines limit.\n            Dots `.` are prohibited for `tag_name`.\n            Supports several tags per player, example:\n            <pre>\n            playerId1,tag1_name,tag1_value\n            playerId2,tag1_name,tag1_value\n            playerId2,tag2_name,tag2_value\n            </pre>\n            Tag values are always set as string values to player tags.",
+          "operationId": "putTagsFromFile",
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK. Only `true` in body means everything went OK.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "CONFLICT. Unparsable CSV line detected or lines limit exceeded"
+            }
+          }
+        }
+      },
+      "/api/sync/{id}/{sync}": {
+        "delete": {
+          "tags": [
+            "/api"
+          ],
+          "operationId": "removeSync",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sync",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/api2/{id}": {
+        "put": {
+          "tags": [
+            "/api2"
+          ],
+          "description": "update progress to server",
+          "operationId": "update_1",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "player's progress/profile and info about commit from myboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyboardProgressPayload"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/email": {
+        "post": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "sends email with verification code for binding",
+          "operationId": "sendCodeToEmail",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "description": "profile id",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailPayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "400": {
+              "description": "Email send rate exceeded. Error code 1023",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "another user already verified email. Error code 1027",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/internal/auth": {
+        "post": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "return auth result without throwing exceptions",
+          "operationId": "auth",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorToken"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/internal/bind": {
+        "post": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "auth token return bind result without throwing exceptions, coz i have exception-driven logic :derp:",
+          "operationId": "bind",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorToken"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BindResponseWithExceptions"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/internal": {
+        "get": {
+          "tags": [
+            "/internal"
+          ],
+          "summary": "Get profiles with specified fields or view by list of ids",
+          "description": "Will fail if fields or view are not specified.",
+          "operationId": "getProfilesByIds",
+          "parameters": [
+            {
+              "name": "ids",
+              "in": "query",
+              "description": "List of ids joined by ,",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "List of fields joined by ','. If empty, a view will be used",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "patch": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "commit list of Updates",
+          "operationId": "commitMark4Partial",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "commitId",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "forceUpdateCheck",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Update"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/internal/sync": {
+        "get": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "auth token and return sync registrations",
+          "operationId": "oldFindSync",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorToken"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Registration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "deprecated": true
+        },
+        "post": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "auth token and return sync registrations",
+          "operationId": "findSync",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorToken"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Registration"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/internal/{profileId}/facebook/friends": {
+        "get": {
+          "tags": [
+            "/internal"
+          ],
+          "operationId": "getFacebookFriendsIds",
+          "parameters": [
+            {
+              "name": "profileId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/internal/{playerId}/latestJwtPayload": {
+        "get": {
+          "tags": [
+            "/internal"
+          ],
+          "operationId": "getLatestJwtPayload",
+          "parameters": [
+            {
+              "name": "playerId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/internal/promo": {
+        "put": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "Update promo id",
+          "operationId": "handlePromoChange",
+          "parameters": [
+            {
+              "name": "promoId",
+              "in": "query",
+              "description": "promo id for support ids",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "Map of playerId associated with promoId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/internal/register": {
+        "post": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "register, bind, auth and start session",
+          "operationId": "register",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterPayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/internal/unbind": {
+        "delete": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "unbind by sync names",
+          "operationId": "unbind",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "syncNames list divided by ,",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/internal/unbindDevice": {
+        "delete": {
+          "tags": [
+            "/internal"
+          ],
+          "description": "unbind device",
+          "operationId": "unbindDevice",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/internal/email": {
+        "post": {
+          "tags": [
+            "/internal"
+          ],
+          "operationId": "verifyEmail",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailCode"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/avg": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "returns",
+          "operationId": "average",
+          "parameters": [
+            {
+              "name": "ids",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "field",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/sync": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "summary": "Get profiles by sync ids",
+          "description": "If a request contains at least one vendorId, all sync types ids,\n            except of vendorId and adId, will be ignored.",
+          "operationId": "findProfilesBySync",
+          "parameters": [
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "gameVersion",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "showBanned",
+              "in": "query",
+              "description": "Show banned or not",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CompatibleProfile"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "link profile with sync id(id from third-party service)",
+          "operationId": "bind_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "map of synchronization type to synchronization id\n            |available synchronization types:\n            |facebookId, gamecenterId, playGamesId, adId, vendorId",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Sync id's map is invalid",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Player not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "/v1"
+          ],
+          "operationId": "unbind_2",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "description": "profile id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/command/{command}": {
+        "delete": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Clear SPECIFIED command which client already perform",
+          "operationId": "clearCommand_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "command",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/command": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get commands which client should perform",
+          "operationId": "getCommands_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Clear ALL commands which client already perform if body is empty, also delete list of commands",
+          "operationId": "clearCommands_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get profiles with specified fields by list of ids",
+          "operationId": "findProfilesByIds",
+          "parameters": [
+            {
+              "name": "ids",
+              "in": "query",
+              "description": "List of ids joined by ,",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "List of fields joined by ','. If empty, all fields will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "gameVersion",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "showBanned",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CompatibleProfile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "commit progress to server",
+          "operationId": "commit",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "commitId",
+              "in": "query",
+              "description": "commit version of profile",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "isPart",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "isUnset",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "player's progress/profile",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "empty": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommitResult"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid payload",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "(DEPRECATED) Registering new player and return new id",
+          "operationId": "register_1",
+          "parameters": [
+            {
+              "name": "gameVersion",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Forwarded-For",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationPayload"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Profile with specified ids is already registered",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Sync id's map is invalid",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Deletes profile, but only if Command 'delete_PD' is set to true",
+          "operationId": "delete_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        },
+        "patch": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "commit progress to server",
+          "operationId": "partialCommit",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "commitId",
+              "in": "query",
+              "description": "commit version of profile",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "list of operations",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialUpdatePayload"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Invalid payload",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/exists/{id}": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Check if profile exists",
+          "operationId": "exists",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/exists/vendorId/{id}": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Check if profile exists by vendor Id",
+          "operationId": "existsByVendor",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/{id}": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "operationId": "getById",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Profile"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/closest": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "operationId": "getClosestPlayers",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "level",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "minLevel",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 0
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/commit": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get commit number",
+          "operationId": "getCommit",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/facebook/friends": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "operationId": "getFacebookFriendsIds_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/friends": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get friends progress",
+          "operationId": "getFriends",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/registration": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get player ids by support id",
+          "operationId": "getIdBySupportId",
+          "parameters": [
+            {
+              "name": "supportId",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/projection/{id}": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get ProfileReader by id",
+          "operationId": "getProfileFieldsById",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "field",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/JsonNode"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/{id}/progress": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get player progress by id",
+          "operationId": "getProgress",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "profile id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "isSupportId",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectNode"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/random": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get random players ids",
+          "operationId": "getRandomPlayers",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/registrations/{id}": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "operationId": "getRegistrations",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Registration"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/tags": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Get players tags",
+          "operationId": "getTags_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/JsonNode"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/time": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "get server time",
+          "operationId": "getTime",
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/multistage/search": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Multistage search according player data",
+          "operationId": "multistageSearch",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            {
+              "name": "excludeIds",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "stages",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Profile"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/progress": {
+        "delete": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Reset progress",
+          "operationId": "reset",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "empty": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/requestDelete": {
+        "post": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Sets `delete_PD: true` in the profile commands",
+          "operationId": "setDeleteCommand",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Profile-Id-Signature",
+              "in": "header",
+              "schema": {
+                "type": "string",
+                "default": "none"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Ok"
+            },
+            "403": {
+              "description": "Access denied"
+            }
+          }
+        }
+      },
+      "/v1/session": {
+        "get": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Start session",
+          "operationId": "startSession",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "401": {
+              "description": "Invalid session",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "default": {
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/sync/{type}": {
+        "delete": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "Unbind sync id with profile",
+          "operationId": "unbind_1",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "description": "profile id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "type",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v1/{username}/username": {
+        "post": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "validate username",
+          "operationId": "validateUserName",
+          "parameters": [
+            {
+              "name": "username",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v2/auth": {
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "description": "Authenticate player and return new jwt cookie",
+          "operationId": "auth_1",
+          "parameters": [
+            {
+              "name": "gameVersion",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "one of VendorToken implementations:\n            Device, Facebook, GooglePlay, GameCenter, Kakao.\n            discriminator is class name in property \"type\"",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorToken"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "404": {
+              "description": "Profile with specified sync ids not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Profile with new JWT-token in Set-Cookie header",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CompatibleProfile"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid auth data",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v2/account/email": {
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "operationId": "confirmEmailCode",
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailConfirmationPayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v2/fill": {
+        "get": {
+          "tags": [
+            "/v2"
+          ],
+          "description": "Get specified amount profiles with specified fields by search criteria",
+          "operationId": "fill",
+          "parameters": [
+            {
+              "in": "query",
+              "description": "\n                query params with key in format name.op are treated as search criteria, where:\n                |name - profile field\n                |op - comparison operation, and available operations are: eq, like, sw(startsWith), gt, gte, lt, lte, in\n        ",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 100
+              }
+            },
+            {
+              "name": "ids",
+              "in": "query",
+              "description": "List of ids joined by ,",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v2/account/forgot": {
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "operationId": "forgotAccountPassword",
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountRestorePayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v2/random": {
+        "get": {
+          "tags": [
+            "/v2"
+          ],
+          "description": "Get random profiles with specified fields by search criteria",
+          "operationId": "random",
+          "parameters": [
+            {
+              "in": "query",
+              "description": "\n                query params with key in format name.op are treated as search criteria, where:\n                |name - profile field\n                |op - comparison operation, and available operations are: eq, like, sw(startsWith), gt, gte, lt, lte, in\n        ",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 100
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v2": {
+        "get": {
+          "tags": [
+            "/v2"
+          ],
+          "description": "Get profiles with specified fields by search criteria",
+          "operationId": "search",
+          "parameters": [
+            {
+              "in": "query",
+              "description": "query params with key in format name.op are treated as search criteria, where:\n                |name - profile field\n                |op - comparison operation, and available operations are: eq, like, sw(startsWith), gt, gte, lt, lte, in",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 100
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "description": "sort field",
+              "schema": {
+                "type": "string",
+                "default": "createdAt"
+              }
+            },
+            {
+              "name": "orderBy",
+              "in": "query",
+              "description": "sort order by desc/asc",
+              "schema": {
+                "type": "string",
+                "default": "desc"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "omitSort",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "description": "Registering new player and return new id",
+          "operationId": "register_2",
+          "parameters": [
+            {
+              "name": "gameVersion",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Forwarded-For",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "\n            one of VendorToken implementations:\n            Device, Facebook, GooglePlay, GameCenter, Kakao.\n            discriminator is class name in property \"type\"",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationPayload"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Profile with specified ids is already registered",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Sync id's map is invalid",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v2/account": {
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "operationId": "registerAccount",
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountRegistrationPayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v2/account/restore": {
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "operationId": "restoreAccountPassword",
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountRestorePayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "*/*": {}
+              }
+            }
+          }
+        }
+      },
+      "/v2/sync": {
+        "post": {
+          "tags": [
+            "/v2"
+          ],
+          "description": "link profile with sync id(id from third-party service)",
+          "operationId": "sync",
+          "parameters": [
+            {
+              "name": "X-Profile-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "one of VendorToken implementations:\n            Device, Facebook, GooglePlay, GameCenter, Kakao, Email.\n            discriminator is class name in property \"type\"",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorToken"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Player not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Sync id's map is invalid",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v3": {
+        "get": {
+          "tags": [
+            "/v3"
+          ],
+          "description": "Get profiles with specified fields by search criteria",
+          "operationId": "search_1",
+          "parameters": [
+            {
+              "in": "query",
+              "description": "\n                query params with key in format name.op are treated as search criteria, where:\n                |name - profile field\n                |op - comparison operation, and available operations are: eq, like, sw(startsWith), gt, gte, lt, lte, in\n        ",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "description": "Comma-separated list for fields to return, when omitted, whole profile will be returned",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "view",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 0
+              }
+            },
+            {
+              "name": "count",
+              "in": "query",
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 100
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "description": "sort fields",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Sort"
+                }
+              }
+            },
+            {
+              "name": "showBanned",
+              "in": "query",
+              "schema": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {}
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "/v3"
+          ],
+          "description": "Registering new player and return new id",
+          "operationId": "register_3",
+          "parameters": [
+            {
+              "name": "gameVersion",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Session-Id",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "X-Forwarded-For",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "\n            one of VendorToken implementations:\n            Device, Facebook, GooglePlay, GameCenter, Kakao.\n            discriminator is class name in property \"type\"",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationPayload"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Player successfully registered",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/RegistrationResponse"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Profile with specified ids is already registered",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Sync id's map is invalid",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v3/tokens": {
+        "post": {
+          "tags": [
+            "/v3"
+          ],
+          "description": "Authenticate player by first valid token and return new jwt cookie\n        if nothing found then bind player with selected GP/GC vendor token else fail.",
+          "operationId": "tokens",
+          "parameters": [
+            {
+              "name": "X-Forwarded-For",
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "description": "List VendorTokens ordered by priority:\n            Device, Facebook, GooglePlay, GameCenter, Kakao.\n            discriminator is class name in property \"type\"",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VendorToken"
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "404": {
+              "description": "Profile with specified sync ids not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/v1/sms": {
+        "post": {
+          "tags": [
+            "/v1"
+          ],
+          "description": "send sms with verification code for binding",
+          "operationId": "sendSmsCode",
+          "requestBody": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmsPayload"
+                }
+              }
+            }
+          },
+          "responses": {
+            "400": {
+              "description": "sms code expired. Error code 1026",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/public/top": {
+        "get": {
+          "tags": [
+            "/api/public"
+          ],
+          "operationId": "get_2",
+          "parameters": [
+            {
+              "name": "country",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JsonNode"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/public/player/{playerId}": {
+        "get": {
+          "tags": [
+            "/api/public"
+          ],
+          "operationId": "getPlayer",
+          "parameters": [
+            {
+              "name": "playerId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "default": {
+              "description": "default response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JsonNode"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "JsonNode": {
+          "type": "object"
+        },
+        "ObjectNode": {
+          "type": "object"
+        },
+        "Profile": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "description": "Unique identifier of profile. This field sets during registration"
+            },
+            "version": {
+              "type": "number",
+              "description": "A field that increases by 1 with each commit by the profile game. For example, it is needed if the game crashed and\n \"forgotten\" previous committed changes. Then, if you try to commit a version lower than the one on the server\n the server will respond with a CHOICE error and a full profile from the server, which means that the game must choose between local progress and progress from the server"
+            },
+            "updatedAt": {
+              "type": "number",
+              "description": "Time of the last commit of the profile (by game or via myboard). Unix time in seconds"
+            },
+            "createdAt": {
+              "type": "number",
+              "description": "Profile creation time. Unix time in seconds"
+            },
+            "commands": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "description": "Commands to be executed by the game"
+              },
+              "description": "Commands to be executed by the game"
+            },
+            "progress": {
+              "$ref": "#/components/schemas/ObjectNode"
+            },
+            "lastSessionId": {
+              "type": "string"
+            },
+            "supportId": {
+              "type": "string",
+              "description": "Legacy field. Usually same as _id"
+            },
+            "tags": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/components/schemas/JsonNode"
+              },
+              "description": "Labels set by mytona services or ML scripts. For example, an iap service can set tags with statistics about a player's purchases.\n Often the fields are needed by mytona services or for filtering in the myboard, although they are also available for the game, but only for reading"
+            },
+            "latestJwtPayload": {
+              "type": "string",
+              "description": "Cache field containing information about the last authentication token if authentication is enabled in the project"
+            }
+          }
+        },
+        "Registration": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "supportId": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "syncIds": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "SearchResult": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "registration": {
+              "$ref": "#/components/schemas/Registration"
+            }
+          }
+        },
+        "DeletedProfileSearchResult": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "registration": {
+              "$ref": "#/components/schemas/Registration"
+            },
+            "deletedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "pdExists": {
+              "type": "boolean"
+            }
+          }
+        },
+        "DashboardSearchField": {
+          "type": "object",
+          "properties": {
+            "field": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "BOOLEAN",
+                "INTEGER",
+                "DOUBLE",
+                "STRING",
+                "LOWERCASE_STRING",
+                "TIMESTAMP",
+                "DATETIME"
+              ]
+            },
+            "collection": {
+              "type": "string"
+            },
+            "operations": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "toLowercase": {
+              "type": "boolean"
+            }
+          }
+        },
+        "CommitResult": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "compatibleProfile": {
+              "type": "boolean"
+            },
+            "sync": {
+              "$ref": "#/components/schemas/Registration"
+            },
+            "commitId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "recoveryNeeded": {
+              "type": "string",
+              "enum": [
+                "FORCE",
+                "CHOICE"
+              ]
+            }
+          }
+        },
+        "ValueNode": {
+          "type": "object"
+        },
+        "CommitParams": {
+          "type": "object",
+          "properties": {
+            "comment": {
+              "type": "string"
+            },
+            "restoreBackupId": {
+              "type": "string"
+            }
+          }
+        },
+        "MyboardProgressPayload": {
+          "type": "object",
+          "properties": {
+            "commitParams": {
+              "$ref": "#/components/schemas/CommitParams"
+            },
+            "progress": {
+              "$ref": "#/components/schemas/ObjectNode"
+            }
+          }
+        },
+        "Error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string"
+            },
+            "extraHeaders": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "loggingLevelOverride": {
+              "type": "string",
+              "enum": [
+                "ERROR",
+                "WARN",
+                "INFO",
+                "DEBUG",
+                "TRACE"
+              ]
+            }
+          }
+        },
+        "EmailPayload": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            }
+          }
+        },
+        "Account": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "pass": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "AppleIdJwt": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "jwt": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "ChinaRID": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "rid": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "Device": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "vendorId": {
+                  "type": "string"
+                },
+                "adId": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "EmailCode": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "Facebook": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "inputToken": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "FacebookLimitedLogin": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "jwt": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "GameCenter": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "playerId": {
+                  "type": "string"
+                },
+                "bundleId": {
+                  "type": "string"
+                },
+                "salt": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "publicKeyUrl": {
+                  "type": "string"
+                },
+                "signature": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "GoogleIdJwt": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "jwt": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "GooglePlay": {
+          "type": "object",
+          "description": "DEPRECATED. Use GooglePlayJwt",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "authCode": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "GooglePlayJwt": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "jwt": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "Kakao": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "accessToken": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "PlayFab": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "sessionTicket": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "SmsCode": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "phone": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "VendorToken": {
+          "required": [
+            "type"
+          ],
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/Device"
+            },
+            {
+              "$ref": "#/components/schemas/Facebook"
+            },
+            {
+              "$ref": "#/components/schemas/GooglePlay"
+            },
+            {
+              "$ref": "#/components/schemas/GameCenter"
+            },
+            {
+              "$ref": "#/components/schemas/GooglePlayJwt"
+            },
+            {
+              "$ref": "#/components/schemas/GoogleIdJwt"
+            },
+            {
+              "$ref": "#/components/schemas/AppleIdJwt"
+            },
+            {
+              "$ref": "#/components/schemas/PlayFab"
+            },
+            {
+              "$ref": "#/components/schemas/Kakao"
+            },
+            {
+              "$ref": "#/components/schemas/EmailCode"
+            },
+            {
+              "$ref": "#/components/schemas/SmsCode"
+            },
+            {
+              "$ref": "#/components/schemas/ChinaRID"
+            },
+            {
+              "$ref": "#/components/schemas/WeChat"
+            },
+            {
+              "$ref": "#/components/schemas/FacebookLimitedLogin"
+            }
+          ]
+        },
+        "WeChat": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "accessToken": {
+                  "type": "string"
+                },
+                "openId": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "BindResponseWithExceptions": {
+          "type": "object",
+          "properties": {
+            "response": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "invalidAuth": {
+              "type": "boolean"
+            },
+            "profileOccupied": {
+              "type": "boolean"
+            },
+            "syncOccupied": {
+              "type": "boolean"
+            },
+            "playerNotFound": {
+              "type": "boolean"
+            },
+            "unknownError": {
+              "type": "boolean"
+            }
+          }
+        },
+        "Update": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "SET",
+                "UNSET"
+              ]
+            },
+            "key": {
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/components/schemas/JsonNode"
+            }
+          }
+        },
+        "RegisterPayload": {
+          "type": "object",
+          "properties": {
+            "gameVersion": {
+              "type": "string"
+            },
+            "startProgress": {
+              "$ref": "#/components/schemas/ObjectNode"
+            },
+            "vendorToken": {
+              "$ref": "#/components/schemas/VendorToken"
+            }
+          }
+        },
+        "Document": {
+          "type": "object",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "CompatibleProfile": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "compatibleProfile": {
+              "type": "boolean"
+            },
+            "syncIds": {
+              "$ref": "#/components/schemas/Registration"
+            },
+            "banned": {
+              "type": "boolean"
+            }
+          }
+        },
+        "PartialUpdatePayload": {
+          "type": "object",
+          "properties": {
+            "set": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/components/schemas/JsonNode"
+              }
+            },
+            "unset": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "RegistrationPayload": {
+          "type": "object",
+          "properties": {
+            "auth": {
+              "$ref": "#/components/schemas/VendorToken"
+            },
+            "progress": {
+              "$ref": "#/components/schemas/ObjectNode"
+            },
+            "authOnConflict": {
+              "type": "boolean"
+            },
+            "currentProfileId": {
+              "type": "string"
+            }
+          }
+        },
+        "EmailConfirmationPayload": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string"
+            }
+          }
+        },
+        "AccountRestorePayload": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          }
+        },
+        "AccountRegistrationPayload": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "pass": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "other": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ProfileCreated": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/RegistrationResponse"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "supportId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "ProfileExists": {
+          "type": "object",
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/RegistrationResponse"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "$ref": "#/components/schemas/Profile"
+                },
+                "supportId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "RegistrationResponse": {
+          "required": [
+            "type"
+          ],
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          },
+          "discriminator": {
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/ProfileCreated"
+            },
+            {
+              "$ref": "#/components/schemas/ProfileExists"
+            }
+          ]
+        },
+        "Sort": {
+          "type": "object",
+          "properties": {
+            "field": {
+              "type": "string"
+            },
+            "order": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          }
+        },
+        "SmsPayload": {
+          "type": "object",
+          "properties": {
+            "phone": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "createdAt": 1697773766.890737000
+}

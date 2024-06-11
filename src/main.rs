@@ -1,12 +1,12 @@
-use std::net::{IpAddr, Ipv4Addr, SocketAddr, ToSocketAddrs};
-use std::process::exit;
+use std::env;
+use std::path::PathBuf;
 use std::sync::Arc;
 use futures::future;
-use log::{debug, info};
+use log::{debug};
 use tokio::fs::read_to_string;
 use http_client::client::HttpClient;
 use http_client::error::Error;
-use http_client::load_test_request::{DIRECTORY, LoadTestRequest};
+use http_client::load_test_request::{LoadTestRequest, to_request};
 use http_client::request::Request;
 use http_client::utils::STATISTICS;
 
@@ -17,19 +17,28 @@ use http_client::utils::STATISTICS;
 async fn main() -> Result<(), Error> {
     env_logger::builder().format_timestamp_millis().init();
 
-    let mut dir = DIRECTORY.clone();
-    dir.push("test_data");
-    dir.push("request");
-    dir.push("request.yml");
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        panic!("Usage: {} <path>", args[0]);
+    }
+
+    let path = PathBuf::from(&args[1]);
+
+    let path = if path.is_absolute() {
+        path
+    } else {
+        env::current_dir().unwrap().join(path)
+    };
 
     let data: Vec<LoadTestRequest> = serde_yaml::from_str(
-        read_to_string(dir.to_str().unwrap()).await?.as_mut_str()
+        read_to_string(path.join("request.yml").to_str().unwrap()).await?.as_mut_str()
     )?;
 
     for req_data in data {
         let requests_per_connection = req_data.repeats / req_data.max_connections;
 
-        let mut request: Request = (&req_data.request).try_into()?;
+        let mut request: Request = to_request(&req_data.request, &path)?;
 
         let ready_request = Arc::new(request.get_raw().await);
 
@@ -38,7 +47,7 @@ async fn main() -> Result<(), Error> {
         let before = std::time::SystemTime::now();
         debug!("Start");
 
-        for i in 0..req_data.max_connections {
+        for _ in 0..req_data.max_connections {
             let mut client = HttpClient::new().await;
             let url = request.url.clone();
             let ready_request = ready_request.clone();
@@ -46,15 +55,11 @@ async fn main() -> Result<(), Error> {
                 for _ in 0..requests_per_connection {
                     let response = client.perform_request(&url, ready_request.clone()).await?;
                     if let Some(mut body_reader) = response.body_reader {
-                        loop {
-                            if let Some(buf) = body_reader.recv().await {
-                                // debug!("{}", buf);
-                            } else {
-                                break;
-                            }
+                        while let Some(_) = body_reader.recv().await {
+                            // debug!("{}", buf);
                         }
                     }
-                    debug!("Finished");
+                    debug!("finished");
                 }
                 Ok::<(), Error>(())
             }));

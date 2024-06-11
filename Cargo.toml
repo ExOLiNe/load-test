@@ -3,8 +3,11 @@ name = "http_client"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "http_client"
+path = "src/lib.rs"
+
 [dependencies]
-clippy = "0.0.302"
 native-tls = "0.2.12"
 
 tokio = { version = "1.37.0", features = ["full"]}
@@ -14,7 +17,7 @@ tokio-util = { version = "0.7.11", features = ["codec"] }
 
 futures = "0.3.30"
 url = "2.5.0"
-async-backtrace = "0.2.7"
+# async-backtrace = "0.2.7"
 bytes = "1.6.0"
 
 strum = "0.26"
@@ -28,13 +31,12 @@ serde_yaml = "0.9.33"
 
 lazy_static = "1.4.0"
 
-tracing = "0.1.40"
+# tracing = "0.1.40"
 
-[dependencies.tracy]
-package = "tracy_full"
-version = "1.3.0"
-features = ["enable", "futures", "tracing"]
+#[dependencies.tracy]
+#package = "tracy_full"
+#version = "1.3.0"
+#features = ["enable", "futures", "tracing"]
 
-[lib]
-name = "http_client"
-path = "src/lib.rs"
+#[profile.release]
+#panic = "abort"

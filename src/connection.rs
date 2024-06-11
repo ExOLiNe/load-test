@@ -1,4 +1,3 @@
-use std::cmp::min;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use log::{debug, warn};
@@ -9,10 +8,11 @@ use tokio::sync::Mutex;
 use tokio_native_tls::{TlsConnector, TlsStream as TokioTlsStream};
 
 use crate::client::Response;
-use crate::error::Error;
+use crate::error::{Error};
 use crate::request::ReadyRequest;
 use crate::response_reader::{HttpEntity, HttpResponseReader};
 use crate::utils::{ip_resolve, NEWLINE_BYTES};
+use crate::constants::IDLE_TIMEOUT;
 
 type ResponseReader<T> = Arc<Mutex<HttpResponseReader<BufReader<ReadHalf<T>>>>>;
 
@@ -33,7 +33,7 @@ pub struct ConnectionOptions {
 
 impl Default for ConnectionOptions {
     fn default() -> Self {
-        ConnectionOptions { idle_timeout: Duration::from_secs(10) }
+        ConnectionOptions { idle_timeout: Duration::from_secs(IDLE_TIMEOUT) }
     }
 }
 
@@ -48,6 +48,7 @@ impl Connection {
     pub async fn write<T: AsyncWriteExt + Unpin>(writer: &mut T, request: &Arc<ReadyRequest>, in_progress: Arc<Mutex<bool>>) -> Result<(), Error> {
         let mut in_progress = in_progress.lock().await;
         *in_progress = true;
+        debug!("Write headers: {}", request.0);
         writer.write_all(request.0.as_bytes()).await?;
         match &request.1 {
             Some(body) => {
@@ -89,11 +90,17 @@ impl Connection {
                             _ => panic!("Invalid state")
                         }
                     },
-                    Err(_) => {
+                    Err(err) => {
                         let idle = SystemTime::now().duration_since(last_packet_time).unwrap();
                         if idle > options.idle_timeout {
                             warn!("Idle timeout");
                             return Err(Error::IdleTimeout);
+                        }
+                        match err {
+                            Error::ZeroRead => {
+                                //warn!("zero read!")
+                            },
+                            _ => return Err(err)
                         }
                     }
                 }
@@ -130,7 +137,6 @@ impl Connection {
             reader.reset();
             let mut in_progress = in_progress.lock().await;
             *in_progress = false;
-            debug!("task");
             Ok::<(), Error>(())
         });
 
@@ -160,7 +166,6 @@ impl Connection {
 }
 
 impl Connection {
-    #[async_backtrace::framed]
     pub async fn new(host: &str, port: u16, use_tls: bool, options: ConnectionOptions) -> Result<Connection, Error> {
         let addr_v4 = ip_resolve(host, port)?;
         let (reader, writer) = {
@@ -171,7 +176,7 @@ impl Connection {
                     .danger_accept_invalid_hostnames(true)
                     .build().unwrap();
                 let tls_connector = TlsConnector::from(native_tls_connector);
-                let tcp_stream = socket.connect(addr_v4).await.expect(format!("could not connect to {}", addr_v4).as_str());
+                let tcp_stream = socket.connect(addr_v4).await?;
                 let (reader, writer) =
                     io::split(tls_connector.connect(format!("{}:{}", addr_v4.ip(), addr_v4.port()).as_str(), tcp_stream).await?);
                 (

@@ -41,21 +41,6 @@ lazy_static! {
 }
 
 #[macro_export]
-macro_rules! measure_time_async {
-    ($block:block) => {{
-        async {
-            /*let start = std::time::Instant::now();
-            let result = $block.await;
-            let duration = start.elapsed();
-            let mut stats = $crate::utils::STATISTICS.lock().await;
-            stats.add_time(concat!(file!(), ":", line!(), ":", stringify!($block)), duration.as_nanos());
-            result*/
-            measure_time!({ $block.await })
-        }
-    }};
-}
-
-#[macro_export]
 macro_rules! measure_time {
     ($block:block) => {{
         let start = std::time::Instant::now();
@@ -79,5 +64,5 @@ pub(crate) fn ip_resolve(host: &str, port: u16) -> Result<SocketAddr, Error> {
             return Ok(addr);
         }
     }
-    return Err(Error::IpResolve(String::from("Could not resolve as ip4")));
+    Err(Error::IpResolve(String::from("Could not resolve as ip4")))
 }

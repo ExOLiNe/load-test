@@ -25,7 +25,9 @@ pub enum Error {
     SystemTime(SystemTimeError),
     NativeTls(native_tls::Error),
     IpResolve(String),
-    IdleTimeout
+    IdleTimeout,
+    ZeroRead,
+    ParseStatus
 }
 
 unsafe impl Send for Error {}
