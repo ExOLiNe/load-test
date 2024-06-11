@@ -17,7 +17,7 @@ pub enum Method {
     HEAD
 }
 
-pub(crate) type BodyType = Option<Arc<Pin<Box<String>>>>;
+pub(crate) type BodyType = Option<Arc<Pin<String>>>;
 
 pub struct Request {
     pub method: Method,

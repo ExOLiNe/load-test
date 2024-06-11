@@ -47,8 +47,8 @@ pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request, Err
     })
 }
 
-pub(crate) fn read_to_body(path: PathBuf) -> Result<Arc<Pin<Box<String>>>, Error> {
-    Ok(Arc::new(Pin::new(Box::new(fs::read_to_string(path)?))))
+pub(crate) fn read_to_body(path: PathBuf) -> Result<Arc<Pin<String>>, Error> {
+    Ok(Arc::new(Pin::new(fs::read_to_string(path)?)))
 }
 
 /*fn deserialize_file_to_string<'de, D>(deserializer: D) -> Result<BodyType, D::Error>

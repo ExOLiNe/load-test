@@ -4,7 +4,7 @@ use std::num::ParseIntError;
 use std::time::SystemTimeError;
 use strum::ParseError;
 
-pub(crate) fn is_normal<T: Sized + Send + Sync + Unpin>() {}
+pub(crate) fn _is_normal<T: Sized + Send + Sync + Unpin>() {}
 
 #[derive(Debug)]
 pub struct CommonError {

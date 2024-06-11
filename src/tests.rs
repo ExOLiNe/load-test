@@ -69,11 +69,11 @@ mod tests {
 
     #[test]
     fn normal_types() {
-        crate::error::is_normal::<Error>();
-        crate::error::is_normal::<HttpHeader>();
-        crate::error::is_normal::<Request>();
-        crate::error::is_normal::<Response>();
-        crate::error::is_normal::<HttpClient>();
-        crate::error::is_normal::<HttpResponseReader<BufReader<ReadHalf<TcpStream>>>>();
+        crate::error::_is_normal::<Error>();
+        crate::error::_is_normal::<HttpHeader>();
+        crate::error::_is_normal::<Request>();
+        crate::error::_is_normal::<Response>();
+        crate::error::_is_normal::<HttpClient>();
+        crate::error::_is_normal::<HttpResponseReader<BufReader<ReadHalf<TcpStream>>>>();
     }
 }
