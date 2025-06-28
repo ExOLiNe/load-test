@@ -1,2 +1,6 @@
 /target
+.cargo
 .idea
+test_data
+openapi.json
+output.json

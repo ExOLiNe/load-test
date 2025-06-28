@@ -9,11 +9,21 @@ use crate::error::{Error};
 use crate::header::HttpHeader;
 use crate::request::ReadyRequest;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Response {
     pub status: u32,
     pub headers: Vec<HttpHeader>,
     pub body_reader: Option<Receiver<String>>
+}
+
+impl Default for Response {
+    fn default() -> Self {
+        Response {
+            status: 0,
+            headers: Vec::with_capacity(20),
+            body_reader: None
+        }
+    }
 }
 
 pub struct HttpClient {

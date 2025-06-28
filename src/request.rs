@@ -33,7 +33,7 @@ impl Request {
         /*let body: Option<Pin<Box<String>>> = self.body.as_mut().map(|mut body| {
             Pin::new(Box::new(body.by_ref().collect()))
         });*/
-        let mut lines = Vec::new();
+        let mut lines = Vec::with_capacity(20);
         let query = &self.url.query().map_or_else(|| {
             self.url.path().to_owned()
         }, |q|{
