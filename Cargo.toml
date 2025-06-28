@@ -7,36 +7,23 @@ edition = "2021"
 name = "http_client"
 path = "src/lib.rs"
 
+[profile.release]
+strip = true
+opt-level = "s"
+lto = true
+codegen-units = 1
+
 [dependencies]
 native-tls = "0.2.12"
-
 tokio = { version = "1.37.0", features = ["full"]}
-tokio-stream = "0.1.15"
 tokio-native-tls = "0.3.1"
-tokio-util = { version = "0.7.11", features = ["codec"] }
-
 futures = "0.3.30"
 url = "2.5.0"
-# async-backtrace = "0.2.7"
 bytes = "1.10.1"
-
 strum = "0.27.1"
 strum_macros = "0.27.1"
-
 env_logger = "0.11.8"
 log = "0.4.27"
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
 serde_yaml = "0.9.33"
-
 lazy_static = "1.5.0"
-
-# tracing = "0.1.40"
-
-#[dependencies.tracy]
-#package = "tracy_full"
-#version = "1.3.0"
-#features = ["enable", "futures", "tracing"]
-
-#[profile.release]
-#panic = "abort"

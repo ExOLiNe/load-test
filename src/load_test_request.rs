@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::str::FromStr;
 use std::sync::Arc;
-
+use log::debug;
 use serde::{Deserialize};
 use url::Url;
 
@@ -37,6 +37,9 @@ pub struct RequestData {
 }
 
 pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request, Error> {
+    /*data.headers.iter().for_each(|(k, v)| {
+        debug!("{:?}: {:?}", k.as_bytes(), v.as_bytes());
+    });*/
     Ok(Request {
         method: Method::from_str(&data.method)?,
         url: Url::parse(&data.query)?,

@@ -1,9 +1,11 @@
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 use futures::future;
 use log::{debug};
 use tokio::fs::read_to_string;
+use tokio::time::sleep;
 use http_client::client::HttpClient;
 use http_client::error::Error;
 use http_client::load_test_request::{LoadTestRequest, to_request};
@@ -15,7 +17,9 @@ use http_client::utils::STATISTICS;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    env_logger::builder().format_timestamp_millis().init();
+    env_logger::builder()
+        .filter(None, log::LevelFilter::Debug)
+        .format_timestamp_millis().init();
 
     let args: Vec<String> = env::args().collect();
 
@@ -51,15 +55,19 @@ async fn main() -> Result<(), Error> {
             let mut client = HttpClient::new().await;
             let url = request.url.clone();
             let ready_request = ready_request.clone();
+            debug!("{:?}", &ready_request.0);
             handles.push(tokio::spawn(async move {
                 for _ in 0..requests_per_connection {
                     let response = client.perform_request(&url, ready_request.clone()).await?;
+                    debug!("Read headers: {:?}", response.headers);
                     if let Some(mut body_reader) = response.body_reader {
-                        while let Some(_) = body_reader.recv().await {
+                        let mut response_body: Vec<u8> = Vec::new();
+                        while let Some(buf) = body_reader.recv().await {
+                            response_body.extend_from_slice(&buf.as_bytes());
                             // debug!("{}", buf);
                         }
+                        debug!("Read body: {}", String::from_utf8_lossy(&response_body));
                     }
-                    debug!("finished");
                 }
                 Ok::<(), Error>(())
             }));

@@ -48,14 +48,11 @@ impl Connection {
     pub async fn write<T: AsyncWriteExt + Unpin>(writer: &mut T, request: &Arc<ReadyRequest>, in_progress: Arc<Mutex<bool>>) -> Result<(), Error> {
         let mut in_progress = in_progress.lock().await;
         *in_progress = true;
-        debug!("Write headers: {}", request.0);
+        debug!("write headers: {:?}", request.0);
         writer.write_all(request.0.as_bytes()).await?;
-        match &request.1 {
-            Some(body) => {
-                writer.write_all(body.as_bytes()).await?
-            },
-            None => ()
-        };
+        if let Some(body) = &request.1 {
+            writer.write_all(body.as_bytes()).await?
+        }
         writer.write_all(NEWLINE_BYTES).await?;
         writer.write_all(NEWLINE_BYTES).await?;
         Ok(())
@@ -98,7 +95,7 @@ impl Connection {
                         }
                         match err {
                             Error::ZeroRead => {
-                                //warn!("zero read!")
+                                // warn!("zero read!")
                             },
                             _ => return Err(err)
                         }
