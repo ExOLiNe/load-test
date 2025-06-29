@@ -47,7 +47,7 @@ macro_rules! measure_time {
         let result = $block;
         let duration = start.elapsed();
         let mut stats = $crate::utils::STATISTICS.lock().await;
-        stats.add_time(concat!(file!(), ":", line!(), ":", stringify!($block)), duration.as_nanos());
+        stats.add_time(concat!(file!(), ":", line!(), ":", stringify!($block)), duration.as_micros());
         result
     }};
 }

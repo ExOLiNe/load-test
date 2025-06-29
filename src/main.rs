@@ -46,6 +46,8 @@ async fn main() -> Result<(), Error> {
 
         let mut request: Request = to_request(&req_data.request, &path)?;
 
+        let url = Arc::new(request.url.clone());
+
         let ready_request = Arc::new(request.get_raw().await);
 
         let mut handles = Vec::with_capacity(req_data.max_connections);
@@ -54,8 +56,8 @@ async fn main() -> Result<(), Error> {
         debug!("Start");
 
         for _ in 0..req_data.max_connections {
+            let url = url.clone();
             let mut client = HttpClient::new().await;
-            let url = request.url.clone();
             let ready_request = ready_request.clone();
             debug!("{:?}", &ready_request.0);
             handles.push(tokio::spawn(async move {
@@ -67,11 +69,9 @@ async fn main() -> Result<(), Error> {
                         let mut response_body: Vec<u8> = Vec::new();
                         while let Some(buf) = body_reader.recv().await {
                             response_body.extend_from_slice(&buf);
-                            // debug!("{}", buf);
                         }
                         debug!("Read body: {}", String::from_utf8_lossy(&response_body));
                     }
-                    // sleep(Duration::from_secs(3)).await;
                 }
             }));
         }

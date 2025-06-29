@@ -82,9 +82,7 @@ where T : AsyncBufReadExt + Unpin
             },
             ReaderState::Headers => {
                 let mut header = String::with_capacity(512);
-                let read_line = measure_time!({
-                    self.reader.read_line(&mut header).await
-                });
+                let read_line = self.reader.read_line(&mut header).await;
                 match read_line {
                     Ok(0) => {
                         panic!("WTF????????");

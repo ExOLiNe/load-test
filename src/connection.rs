@@ -13,6 +13,7 @@ use crate::response_reader::{HttpEntity, HttpResponseReader};
 use crate::utils::{ip_resolve, NEWLINE_BYTES};
 use crate::constants::IDLE_TIMEOUT;
 use crate::error::Error::ConnectionClosedUnexpectedly;
+use crate::measure_time;
 
 type ResponseReader<T> = Arc<Mutex<HttpResponseReader<BufReader<ReadHalf<T>>>>>;
 
@@ -163,7 +164,9 @@ impl Connection {
 
 impl Connection {
     pub async fn new(host: &str, port: u16, use_tls: bool, options: ConnectionOptions) -> Result<Connection, Error> {
-        let addr_v4 = ip_resolve(host, port)?;
+        let addr_v4 = measure_time!({
+            ip_resolve(host, port)?
+        });
         let (reader, writer) = {
             let socket = TcpSocket::new_v4()?;
             socket.set_keepalive(true)?;
