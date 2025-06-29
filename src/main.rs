@@ -1,11 +1,9 @@
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::Duration;
 use futures::future;
 use log::{debug};
 use tokio::fs::read_to_string;
-use tokio::time::sleep;
 use http_client::client::HttpClient;
 use http_client::error::Error;
 use http_client::load_test_request::{LoadTestRequest, to_request};
@@ -14,9 +12,15 @@ use http_client::utils::STATISTICS;
 
 // #[global_allocator]
 // static ALLOC: tracy::GlobalAllocator = tracy::GlobalAllocator::new();
+#[cfg(feature = "dhat-heap")]
+#[global_allocator]
+static ALLOC: dhat::Alloc = dhat::Alloc;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    #[cfg(feature = "dhat-heap")]
+    let _profiler = dhat::Profiler::new_heap();
+
     env_logger::builder()
         .filter(None, log::LevelFilter::Debug)
         .format_timestamp_millis().init();
@@ -58,7 +62,8 @@ async fn main() -> Result<(), Error> {
             debug!("{:?}", &ready_request.0);
             handles.push(tokio::spawn(async move {
                 for _ in 0..requests_per_connection {
-                    let response = client.perform_request(&url, ready_request.clone()).await?;
+                    debug!("=======================================================================");
+                    let response = client.perform_request(&url, ready_request.clone()).await.unwrap();
                     debug!("Read headers: {:?}", response.headers);
                     if let Some(mut body_reader) = response.body_reader {
                         let mut response_body: Vec<u8> = Vec::new();
@@ -68,8 +73,8 @@ async fn main() -> Result<(), Error> {
                         }
                         debug!("Read body: {}", String::from_utf8_lossy(&response_body));
                     }
+                    // sleep(Duration::from_secs(3)).await;
                 }
-                Ok::<(), Error>(())
             }));
         }
 

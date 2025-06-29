@@ -4,7 +4,6 @@ use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::str::FromStr;
 use std::sync::Arc;
-use log::debug;
 use serde::{Deserialize};
 use url::Url;
 

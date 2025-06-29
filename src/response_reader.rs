@@ -1,5 +1,4 @@
 use bytes::BytesMut;
-use log::{debug};
 use tokio::io::{AsyncBufReadExt, AsyncReadExt};
 
 use crate::error::Error;
@@ -66,7 +65,7 @@ where T : AsyncBufReadExt + Unpin
     pub async fn next_entity(&mut self) -> Result<HttpEntity, Error> {
         match self.state {
             ReaderState::Status => {
-                let mut status_str = String::new();
+                let mut status_str = String::with_capacity(256);
                 match self.reader.read_line(&mut status_str).await {
                     Ok(0) => {
                         Err(ZeroRead)
@@ -82,7 +81,7 @@ where T : AsyncBufReadExt + Unpin
                 }
             },
             ReaderState::Headers => {
-                let mut header = String::new();
+                let mut header = String::with_capacity(512);
                 let read_line = measure_time!({
                     self.reader.read_line(&mut header).await
                 });

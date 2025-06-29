@@ -12,13 +12,17 @@ strip = true
 opt-level = "s"
 lto = true
 codegen-units = 1
+debug = 1
+
+[features]
+dhat-heap = []
 
 [dependencies]
-native-tls = "0.2.12"
-tokio = { version = "1.37.0", features = ["full"]}
+native-tls = "0.2.14"
+tokio = { version = "1.45.1", features = ["full"]}
 tokio-native-tls = "0.3.1"
-futures = "0.3.30"
-url = "2.5.0"
+futures = "0.3.31"
+url = "2.5.4"
 bytes = "1.10.1"
 strum = "0.27.1"
 strum_macros = "0.27.1"
@@ -27,3 +31,4 @@ log = "0.4.27"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_yaml = "0.9.33"
 lazy_static = "1.5.0"
+dhat = "0.3.3"

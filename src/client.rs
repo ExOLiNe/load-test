@@ -64,6 +64,15 @@ impl HttpClient {
             self.connections.get_mut(url).expect("Invalid state")
         };
 
-        connection.send_request(request).await
+        match connection.send_request(request.clone()).await {
+            Err(Error::ConnectionClosedUnexpectedly) => {
+                self.connections.insert(
+                    url.to_string(),
+                    Connection::new(host.as_str(), port, use_tls, ConnectionOptions::default()).await?
+                );
+                self.connections.get_mut(url).unwrap().send_request(request).await
+            },
+            something_else => something_else
+        }
     }
 }

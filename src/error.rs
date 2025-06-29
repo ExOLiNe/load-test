@@ -27,7 +27,8 @@ pub enum Error {
     IpResolve(String),
     IdleTimeout,
     ZeroRead,
-    ParseStatus
+    ParseStatus,
+    ConnectionClosedUnexpectedly
 }
 
 unsafe impl Send for Error {}

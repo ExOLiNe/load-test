@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use log::{debug, warn};
-
 use tokio::io::{self, AsyncRead, AsyncWriteExt, BufReader, ReadHalf, WriteHalf};
 use tokio::net::{TcpSocket, TcpStream as TokioTcpStream};
 use tokio::sync::Mutex;
@@ -13,6 +12,7 @@ use crate::request::ReadyRequest;
 use crate::response_reader::{HttpEntity, HttpResponseReader};
 use crate::utils::{ip_resolve, NEWLINE_BYTES};
 use crate::constants::IDLE_TIMEOUT;
+use crate::error::Error::ConnectionClosedUnexpectedly;
 
 type ResponseReader<T> = Arc<Mutex<HttpResponseReader<BufReader<ReadHalf<T>>>>>;
 
@@ -88,16 +88,16 @@ impl Connection {
                         }
                     },
                     Err(err) => {
-                        let idle = SystemTime::now().duration_since(last_packet_time).unwrap();
+                        let idle = SystemTime::now().duration_since(last_packet_time)?;
                         if idle > options.idle_timeout {
                             warn!("Idle timeout");
                             return Err(Error::IdleTimeout);
                         }
-                        match err {
+                        return match err {
                             Error::ZeroRead => {
-                                // warn!("zero read!")
+                                Err(ConnectionClosedUnexpectedly)
                             },
-                            _ => return Err(err)
+                            _ => Err(err)
                         }
                     }
                 }
@@ -141,6 +141,7 @@ impl Connection {
     }
 
     pub async fn send_request(&mut self, request: Arc<ReadyRequest>) -> Result<Response, Error> {
+        debug!("send request");
         match &mut self.writer {
             StreamWriter::Plain(writer) => {
                 Connection::write(writer, &request, self.in_progress.clone()).await?;
@@ -149,6 +150,7 @@ impl Connection {
                 Connection::write(writer, &request, self.in_progress.clone()).await?;
             }
         }
+        debug!("send request finished");
 
         let response = match &self.reader {
             StreamReader::Plain(reader) => {
@@ -167,13 +169,18 @@ impl Connection {
         let addr_v4 = ip_resolve(host, port)?;
         let (reader, writer) = {
             let socket = TcpSocket::new_v4()?;
+            socket.set_keepalive(true)?;
+
             if use_tls {
                 let native_tls_connector = native_tls::TlsConnector::builder()
                     .danger_accept_invalid_certs(true)
                     .danger_accept_invalid_hostnames(true)
-                    .build().unwrap();
+                    .build()?;
                 let tls_connector = TlsConnector::from(native_tls_connector);
+                debug!("Connecting raw tcp..");
                 let tcp_stream = socket.connect(addr_v4).await?;
+                debug!("TCP connected");
+                debug!("TLS Handshaking..");
                 let (reader, writer) =
                     io::split(tls_connector.connect(format!("{}:{}", addr_v4.ip(), addr_v4.port()).as_str(), tcp_stream).await?);
                 (
@@ -187,9 +194,11 @@ impl Connection {
                     StreamWriter::Tls(writer)
                 )
             } else {
-                debug!("Plain tcp detected");
+                debug!("Connecting raw tcp..");
+                let stream = socket.connect(addr_v4).await?;
+                debug!("TCP connected");
                 let (reader, writer) = io::split(
-                    socket.connect(addr_v4).await?
+                    stream
                 );
                 (
                     StreamReader::Plain(
