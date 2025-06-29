@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
-
+use bytes::Bytes;
 use tokio::sync::mpsc::Receiver;
 use url::Url;
 
@@ -13,7 +13,7 @@ use crate::request::ReadyRequest;
 pub struct Response {
     pub status: u32,
     pub headers: Vec<HttpHeader>,
-    pub body_reader: Option<Receiver<String>>
+    pub body_reader: Option<Receiver<Bytes>>
 }
 
 impl Default for Response {

@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::net::AddrParseError;
 use std::num::ParseIntError;
 use std::time::SystemTimeError;
+use bytes::Bytes;
 use strum::ParseError;
 
 pub(crate) fn _is_normal<T: Sized + Send + Sync + Unpin>() {}
@@ -20,7 +21,7 @@ pub enum Error {
     AddrParse(AddrParseError),
     StrumParse(ParseError),
     UrlParse(url::ParseError),
-    MpscSend(tokio::sync::mpsc::error::SendError<String>),
+    MpscSend(tokio::sync::mpsc::error::SendError<Bytes>),
     Serde(serde_yaml::Error),
     SystemTime(SystemTimeError),
     NativeTls(native_tls::Error),
@@ -72,8 +73,8 @@ impl From<url::ParseError> for Error {
     }
 }
 
-impl From<tokio::sync::mpsc::error::SendError<String>> for Error {
-    fn from(value: tokio::sync::mpsc::error::SendError<String>) -> Self {
+impl From<tokio::sync::mpsc::error::SendError<Bytes>> for Error {
+    fn from(value: tokio::sync::mpsc::error::SendError<Bytes>) -> Self {
         Error::MpscSend(value)
     }
 }

@@ -49,7 +49,7 @@ impl Connection {
         let mut in_progress = in_progress.lock().await;
         *in_progress = true;
         debug!("write headers: {:?}", request.0);
-        writer.write_all(request.0.as_bytes()).await?;
+        writer.write_all(&*request.0).await?;
         if let Some(body) = &request.1 {
             writer.write_all(body.as_bytes()).await?
         }
@@ -104,38 +104,35 @@ impl Connection {
             }
         }
 
-        let (sender, receiver) = tokio::sync::mpsc::channel(1_000_000);
+        let (sender, receiver) = tokio::sync::mpsc::channel(1024);
 
         let in_progress = in_progress.clone();
 
         response.body_reader = Some(receiver);
 
         let reader = reader.clone();
-        tokio::spawn(async move {
-            let mut reader = reader.lock().await;
-            loop {
-                match reader.next_entity().await {
-                    Ok(value) => {
-                        match value {
-                            HttpEntity::Status(_) | HttpEntity::HeaderEnd | HttpEntity::Header(_) => (),
-                            HttpEntity::Body(body) => {
-                                sender.send(body).await?;
-                            }
-                            HttpEntity::End => {
-                                break
-                            }
+        let mut reader = reader.lock().await;
+        loop {
+            match reader.next_entity().await {
+                Ok(value) => {
+                    match value {
+                        HttpEntity::Status(_) | HttpEntity::HeaderEnd | HttpEntity::Header(_) => (),
+                        HttpEntity::Body(body) => {
+                            sender.send(body).await?;
                         }
-                    },
-                    Err(e) => {
-                        panic!("{:?}", e);
+                        HttpEntity::End => {
+                            break
+                        }
                     }
-                };
-            }
-            reader.reset();
-            let mut in_progress = in_progress.lock().await;
-            *in_progress = false;
-            Ok::<(), Error>(())
-        });
+                },
+                Err(e) => {
+                    panic!("{:?}", e);
+                }
+            };
+        }
+        reader.reset();
+        let mut in_progress = in_progress.lock().await;
+        *in_progress = false;
 
         Ok(response)
     }

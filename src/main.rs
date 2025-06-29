@@ -66,7 +66,7 @@ async fn main() -> Result<(), Error> {
                     if let Some(mut body_reader) = response.body_reader {
                         let mut response_body: Vec<u8> = Vec::new();
                         while let Some(buf) = body_reader.recv().await {
-                            response_body.extend_from_slice(&buf.as_bytes());
+                            response_body.extend_from_slice(&buf);
                             // debug!("{}", buf);
                         }
                         debug!("Read body: {}", String::from_utf8_lossy(&response_body));

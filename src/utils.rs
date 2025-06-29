@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::net::{SocketAddr, ToSocketAddrs};
 use lazy_static::lazy_static;
-use log::{info, trace};
+use log::{info};
 use tokio::sync::Mutex;
 
 use crate::error::Error;
