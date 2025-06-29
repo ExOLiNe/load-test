@@ -4,7 +4,6 @@ use tokio::io::{AsyncBufReadExt, AsyncReadExt};
 use crate::error::Error;
 use crate::error::Error::ZeroRead;
 use crate::header::HttpHeader;
-use crate::measure_time;
 use crate::response_reader::ResponseBodyType::{Chunked, Plain};
 use crate::utils::NEWLINE;
 

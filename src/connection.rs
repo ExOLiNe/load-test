@@ -105,35 +105,39 @@ impl Connection {
             }
         }
 
-        let (sender, receiver) = tokio::sync::mpsc::channel(1024);
+        let (sender, receiver) = tokio::sync::mpsc::channel(10 * 1024);
 
         let in_progress = in_progress.clone();
 
         response.body_reader = Some(receiver);
 
         let reader = reader.clone();
-        let mut reader = reader.lock().await;
-        loop {
-            match reader.next_entity().await {
-                Ok(value) => {
-                    match value {
-                        HttpEntity::Status(_) | HttpEntity::HeaderEnd | HttpEntity::Header(_) => (),
-                        HttpEntity::Body(body) => {
-                            sender.send(body).await?;
+        tokio::spawn(async move {
+            let mut reader = reader.lock().await;
+            loop {
+                match reader.next_entity().await {
+                    Ok(value) => {
+                        match value {
+                            HttpEntity::Status(_) | HttpEntity::HeaderEnd | HttpEntity::Header(_) => (),
+                            HttpEntity::Body(body) => {
+                                sender.send(body).await?;
+                            }
+                            HttpEntity::End => {
+                                break
+                            }
                         }
-                        HttpEntity::End => {
-                            break
-                        }
+                    },
+                    Err(e) => {
+                        panic!("{:?}", e);
                     }
-                },
-                Err(e) => {
-                    panic!("{:?}", e);
-                }
-            };
-        }
-        reader.reset();
-        let mut in_progress = in_progress.lock().await;
-        *in_progress = false;
+                };
+            }
+
+            reader.reset();
+            let mut in_progress = in_progress.lock().await;
+            *in_progress = false;
+            Ok::<(), Error>(())
+        });
 
         Ok(response)
     }
@@ -160,9 +164,7 @@ impl Connection {
         };
         Ok(response)
     }
-}
 
-impl Connection {
     pub async fn new(host: &str, port: u16, use_tls: bool, options: ConnectionOptions) -> Result<Connection, Error> {
         let addr_v4 = measure_time!({
             ip_resolve(host, port)?
