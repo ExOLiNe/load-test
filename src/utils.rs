@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::net::{SocketAddr, ToSocketAddrs};
 use lazy_static::lazy_static;
-use log::trace;
+use log::{info, trace};
 use tokio::sync::Mutex;
 
 use crate::error::Error;
@@ -23,9 +23,9 @@ impl Statistics {
 
     pub fn print(&mut self) {
         let divider = 1_000_000_f64;
-        println!("Execution time statistics:");
+        info!("Execution time statistics:");
         for (func, (sum, count)) in &self.times {
-            trace!("{}: total: {}, average: {}", func, *sum as f64 / divider, *sum as f64 / (*count as f64 * divider));
+            info!("{}: total: {}, average: {}", func, *sum as f64 / divider, *sum as f64 / (*count as f64 * divider));
         }
     }
 }

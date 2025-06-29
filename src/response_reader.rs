@@ -52,7 +52,7 @@ where T : AsyncBufReadExt + Unpin
             reader,
             state: ReaderState::Status,
             response_body_type: ResponseBodyType::default(),
-            buf: BytesMut::with_capacity(1024 * 1024)
+            buf: BytesMut::with_capacity(1024)
         }
     }
 

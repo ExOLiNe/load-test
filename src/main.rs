@@ -10,8 +10,6 @@ use http_client::load_test_request::{LoadTestRequest, to_request};
 use http_client::request::Request;
 use http_client::utils::STATISTICS;
 
-// #[global_allocator]
-// static ALLOC: tracy::GlobalAllocator = tracy::GlobalAllocator::new();
 #[cfg(feature = "dhat-heap")]
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
