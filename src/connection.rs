@@ -89,16 +89,19 @@ impl Connection {
                         }
                     },
                     Err(err) => {
-                        let idle = SystemTime::now().duration_since(last_packet_time)?;
-                        if idle > options.idle_timeout {
-                            warn!("Idle timeout");
-                            return Err(Error::IdleTimeout);
-                        }
                         return match err {
                             Error::ZeroRead => {
                                 Err(ConnectionClosedUnexpectedly)
                             },
-                            _ => Err(err)
+                            _ => {
+                                let idle = SystemTime::now().duration_since(last_packet_time)?;
+                                if idle > options.idle_timeout {
+                                    warn!("Idle timeout");
+                                    Err(Error::IdleTimeout)
+                                } else {
+                                    Err(err)
+                                }
+                            }
                         }
                     }
                 }
