@@ -76,7 +76,9 @@ where T : AsyncBufReadExt + Unpin
                         let status: u32 = status_iter.next().ok_or(Error::ParseStatus)?.parse()?;
                         Ok(HttpEntity::Status(status))
                     }
-                    Err(e) => Err(Error::IO(e)),
+                    Err(e) => {
+                        Err(Error::IO(e))
+                    },
                 }
             },
             ReaderState::Headers => {
@@ -102,7 +104,9 @@ where T : AsyncBufReadExt + Unpin
                             Ok(HttpEntity::Header(header_parsed))
                         }
                     }
-                    Err(e) => Err(Error::IO(e)),
+                    Err(e) => {
+                        Err(Error::IO(e))
+                    },
                 }
             }
             ReaderState::Body => {

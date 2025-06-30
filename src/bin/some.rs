@@ -30,33 +30,5 @@ async fn main() -> Result<(), Error> {
     }
     sleep(Duration::from_secs(1)).await;
     debug!("{:?}", &vec[args[1].as_str().parse::<usize>().unwrap()]);
-    /*let args: Vec<String> = env::args().collect();
-    let path = PathBuf::from(&args[1]);
-
-    let path = if path.is_absolute() {
-        path
-    } else {
-        env::current_dir().unwrap().join(path)
-    };
-
-    let data: Vec<LoadTestRequest> = serde_yaml::from_str(
-        read_to_string(path.join("request.yml").to_str().unwrap()).await?.as_mut_str()
-    )?;
-
-    for req_data in data {
-        let mut request: Request = to_request(&req_data.request, &path)?;
-
-        let ready_request = request.get_raw().await;
-
-        let mut vec = Vec::with_capacity(1_0_000);
-
-        for _ in 0..vec.capacity() {
-            vec.push(ready_request.clone());
-            debug!(".");
-        }
-        debug!("Finished");
-        debug!("{:?}", &vec[args[2].as_str().parse::<usize>().unwrap()]);
-        sleep(Duration::from_secs(1)).await;
-    }*/
     Ok(())
 }

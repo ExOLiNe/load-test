@@ -32,3 +32,5 @@ serde = { version = "1.0.219", features = ["derive"] }
 serde_yaml = "0.9.33"
 lazy_static = "1.5.0"
 dhat = "0.3.3"
+anyhow = "1.0.98"
+backtrace = "0.3.75"
