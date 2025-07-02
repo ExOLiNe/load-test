@@ -1,12 +1,11 @@
-use bytes::BytesMut;
-use tokio::io::{AsyncBufReadExt, AsyncReadExt};
+use bytes::{Buf, Bytes, BytesMut};
+use tokio::io::{AsyncBufRead, AsyncBufReadExt, AsyncReadExt};
 
-use crate::error::Error;
-use crate::error::Error::ZeroRead;
 use crate::header::HttpHeader;
-use crate::measure_time;
 use crate::response_reader::ResponseBodyType::{Chunked, Plain};
 use crate::utils::NEWLINE;
+use anyhow::{anyhow, Result};
+use crate::error::MyError::{ConnectionClosedUnexpectedly, HeaderParseError, ZeroRead};
 
 #[derive(Clone)]
 enum ReaderState {
@@ -15,11 +14,12 @@ enum ReaderState {
     Body
 }
 
+#[derive(Debug)]
 pub enum HttpEntity {
     Status(u32),
     Header(HttpHeader),
     HeaderEnd,
-    Body(String),
+    Body(Bytes),
     End,
 }
 
@@ -45,14 +45,14 @@ pub struct HttpResponseReader<T> {
 }
 
 impl <T>HttpResponseReader<T>
-where T : AsyncBufReadExt + Unpin
+where T : AsyncBufRead + Unpin
 {
     pub fn new(reader: T) -> Self {
         HttpResponseReader {
             reader,
             state: ReaderState::Status,
             response_body_type: ResponseBodyType::default(),
-            buf: BytesMut::with_capacity(1024 * 1024)
+            buf: BytesMut::with_capacity(1024)
         }
     }
 
@@ -62,29 +62,29 @@ where T : AsyncBufReadExt + Unpin
         self.buf.clear();
     }
 
-    pub async fn next_entity(&mut self) -> Result<HttpEntity, Error> {
+    pub async fn next_entity(&mut self) -> Result<HttpEntity> {
         match self.state {
             ReaderState::Status => {
                 let mut status_str = String::with_capacity(256);
                 match self.reader.read_line(&mut status_str).await {
                     Ok(0) => {
-                        Err(ZeroRead)
+                        Err(anyhow!(ConnectionClosedUnexpectedly))
                     }
                     Ok(_) => {
                         self.state = ReaderState::Headers;
                         let mut status_iter = status_str.split(' ');
                         status_iter.next();
-                        let status: u32 = status_iter.next().ok_or(Error::ParseStatus)?.parse()?;
+                        let status: u32 = status_iter.next().ok_or(HeaderParseError)?.parse()?;
                         Ok(HttpEntity::Status(status))
                     }
-                    Err(e) => Err(Error::IO(e)),
+                    Err(e) => {
+                        Err(anyhow!(e))
+                    },
                 }
             },
             ReaderState::Headers => {
                 let mut header = String::with_capacity(512);
-                let read_line = measure_time!({
-                    self.reader.read_line(&mut header).await
-                });
+                let read_line = self.reader.read_line(&mut header).await;
                 match read_line {
                     Ok(0) => {
                         panic!("WTF????????");
@@ -105,97 +105,111 @@ where T : AsyncBufReadExt + Unpin
                             Ok(HttpEntity::Header(header_parsed))
                         }
                     }
-                    Err(e) => Err(Error::IO(e)),
+                    Err(e) => {
+                        Err(anyhow!(e))
+                    },
                 }
             }
             ReaderState::Body => {
-                self.read_body_next().await.map(|str| {
-                    str.map_or(HttpEntity::End, |str| {
-                        HttpEntity::Body(str)
+                self.read_body_next().await.map(|str: Option<Bytes>| {
+                    str.map_or(HttpEntity::End, |body| {
+                        HttpEntity::Body(body)
                     })
                 })
             }
         }
     }
 
-    async fn read_body_next(&mut self) -> Result<Option<String>, Error> {
+    async fn read_body_next(&mut self) -> Result<Option<Bytes>> {
         match self.response_body_type {
-            Plain((mut already_read, content_length)) => {
+            Plain((already_read, content_length)) => {
+                if already_read == content_length {
+                    return Ok(None);
+                }
                 let to_read = content_length - already_read;
+                while self.buf.len() < to_read {
+                    let read = self.reader.read_buf(&mut self.buf).await?;
+                    if read == 0 { return Err(anyhow!(ZeroRead)); }
+                }
+                let chunk = self.buf.split_to(to_read).freeze();
+                self.response_body_type = Plain((already_read + to_read, content_length));
+                Ok(Some(chunk))
+            }
+            Chunked => {
+                let mut chunk_size_buf = String::new();
+                loop {
+                    let newline_pos = self.buf.windows(2).position(|w| w == b"\r\n");
+                    if let Some(pos) = newline_pos {
+                        // Found \r\n — extract line
+                        chunk_size_buf.push_str(&String::from_utf8_lossy(&self.buf[..pos]));
+                        self.buf.advance(pos + 2); // Consume line + CRLF
+                        break;
+                    }
 
-                if to_read == 0 {
+                    // Need more data
+                    let read = self.reader.read_buf(&mut self.buf).await?;
+                    if read == 0 {
+                        return Err(anyhow!("EOF while reading chunk size line"));
+                    }
+                }
+
+                let chunk_size = usize::from_str_radix(chunk_size_buf.trim(), 16)?;
+                if chunk_size == 0 {
+                    // Consume final CRLF
+                    loop {
+                        if self.buf.windows(2).position(|w| w == b"\r\n").is_some() {
+                            self.buf.advance(2);
+                            break;
+                        }
+                        let read = self.reader.read_buf(&mut self.buf).await?;
+                        if read == 0 {
+                            return Err(anyhow!("EOF while reading final CRLF"));
+                        }
+                    }
                     return Ok(None);
                 }
 
-                // let mut buf = BytesMut::with_capacity(to_read);
-                match self.reader.read_buf(&mut self.buf).await {
-                    Ok(0) => {
-                        panic!("W T F CORPORATION");
-                    }
-                    Ok(size) => {
-                        already_read += size;
-                        self.response_body_type = Plain((already_read, content_length));
-                        Ok(Some(String::from_utf8_lossy(&self.buf).to_string()))
-                    },
-                    Err(e) => {
-                        Err(Error::IO(e))
+                // Wait until we have enough bytes for the chunk + CRLF
+                let total_needed = chunk_size + 2;
+                while self.buf.len() < total_needed {
+                    let read = self.reader.read_buf(&mut self.buf).await?;
+                    if read == 0 {
+                        return Err(anyhow!("EOF while reading chunk body"));
                     }
                 }
-            }
-            Chunked => {
-                let mut chunk_size_buf = String::with_capacity(8);
 
-                let chunk_size = {
-                    measure_time!({
-                            self.reader.read_line(&mut chunk_size_buf).await?
-                        }
-                    );
+                // Split out chunk
+                let chunk = self.buf.split_to(chunk_size).freeze();
 
-                    let buf_slice = chunk_size_buf.trim();
-                    if !buf_slice.is_empty() {
-                        let chunk_size = usize::from_str_radix(buf_slice, 16)?;
-                        if chunk_size == 0 {
-                            // read last \r\n\r\n in request
-                            chunk_size_buf.clear();
-                            self.reader.read_line(&mut chunk_size_buf).await.unwrap();
-                            return Ok(None)
-                        } else {
-                            chunk_size
-                        }
-                    } else {
-                        panic!();
-                    }
-                };
-                unsafe {
-                    measure_time!({
-                        self.buf.clear();
-                        self.buf.set_len(chunk_size)
-                    });
+                // Validate and consume CRLF
+                if &self.buf[..2] != b"\r\n" {
+                    return Err(anyhow!("Missing CRLF after chunk"));
                 }
-                let read_exact = measure_time!({
-                    self.reader.read_exact(&mut self.buf[..chunk_size]).await
-                });
-                match read_exact {
-                    Ok(size) => {
-                        if size != chunk_size {
-                            panic!("{} != {}", size, chunk_size);
-                        }
+                self.buf.advance(2);
 
-                        // read \n\r after every chunk was read
-                        chunk_size_buf.clear();
-                        measure_time!({
-                            self.reader.read_line(&mut chunk_size_buf).await?
-                        });
-
-                        let str = String::from_utf8_lossy(&self.buf[..chunk_size]).to_string();
-
-                        Ok(Some(str))
-                    },
-                    Err(err) => {
-                        panic!("{}", err);
-                    }
-                }
+                Ok(Some(chunk))
             }
         }
+    }
+}
+
+mod tests {
+    #[cfg(test)]
+    #[tokio::test]
+    async fn response_reader_test() -> Result<()> {
+        env_logger::builder()
+            .filter(None, log::LevelFilter::Debug)
+            .format_timestamp_millis().init();
+        let file = File::open("test_resources/chunked_response.txt").await?;
+        let mut reader = HttpResponseReader::new(BufReader::new(file));
+        loop {
+            let entity = reader.next_entity().await?;
+            debug!("{:?}", entity);
+            if let HttpEntity::End = entity {
+                break;
+            }
+        }
+        debug!("Finished");
+        Ok(())
     }
 }

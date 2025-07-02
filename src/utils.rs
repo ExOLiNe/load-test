@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 use std::net::{SocketAddr, ToSocketAddrs};
 use lazy_static::lazy_static;
-use log::trace;
+use log::{info};
 use tokio::sync::Mutex;
 
-use crate::error::Error;
+use anyhow::{anyhow, Result};
+use crate::error::MyError::IpResolve;
 
 pub struct Statistics {
     times: HashMap<&'static str, (u128, u32)>,
@@ -23,9 +24,9 @@ impl Statistics {
 
     pub fn print(&mut self) {
         let divider = 1_000_000_f64;
-        println!("Execution time statistics:");
+        info!("Execution time statistics:");
         for (func, (sum, count)) in &self.times {
-            trace!("{}: total: {}, average: {}", func, *sum as f64 / divider, *sum as f64 / (*count as f64 * divider));
+            info!("{}: total: {}, average: {}", func, *sum as f64 / divider, *sum as f64 / (*count as f64 * divider));
         }
     }
 }
@@ -47,7 +48,7 @@ macro_rules! measure_time {
         let result = $block;
         let duration = start.elapsed();
         let mut stats = $crate::utils::STATISTICS.lock().await;
-        stats.add_time(concat!(file!(), ":", line!(), ":", stringify!($block)), duration.as_nanos());
+        stats.add_time(concat!(file!(), ":", line!(), ":", stringify!($block)), duration.as_micros());
         result
     }};
 }
@@ -55,14 +56,12 @@ macro_rules! measure_time {
 pub const NEWLINE: &str = "\r\n";
 pub const NEWLINE_BYTES: &[u8] = NEWLINE.as_bytes();
 
-pub(crate) fn ip_resolve(host: &str, port: u16) -> Result<SocketAddr, Error> {
-    let addrs_iter = (host, port).to_socket_addrs().map_err(
-        |err| Error::IpResolve(format!("{}", err))
-    )?;
+pub(crate) fn ip_resolve(host: &str, port: u16) -> Result<SocketAddr> {
+    let addrs_iter = (host, port).to_socket_addrs()?;
     for addr in addrs_iter {
         if addr.is_ipv4() {
             return Ok(addr);
         }
     }
-    Err(Error::IpResolve(String::from("Could not resolve as ip4")))
+    Err(anyhow!(IpResolve))
 }

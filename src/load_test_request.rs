@@ -7,8 +7,8 @@ use std::sync::Arc;
 use serde::{Deserialize};
 use url::Url;
 
-use crate::error::Error;
 use crate::request::{Method, Request};
+use anyhow::Result;
 
 /*#[cfg(target_os = "linux")]
 const DIR_STR: &str = "/mnt/d/RustroverProjects/http_client/";
@@ -35,7 +35,7 @@ pub struct RequestData {
     pub body: Option<PathBuf>
 }
 
-pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request, Error> {
+pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request> {
     /*data.headers.iter().for_each(|(k, v)| {
         debug!("{:?}: {:?}", k.as_bytes(), v.as_bytes());
     });*/
@@ -49,7 +49,7 @@ pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request, Err
     })
 }
 
-pub(crate) fn read_to_body(path: PathBuf) -> Result<Arc<Pin<String>>, Error> {
+pub(crate) fn read_to_body(path: PathBuf) -> Result<Arc<Pin<String>>> {
     Ok(Arc::new(Pin::new(fs::read_to_string(path)?)))
 }
 

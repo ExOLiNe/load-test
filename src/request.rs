@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
-
+use bytes::Bytes;
 use strum_macros::{Display, EnumString};
 use url::Url;
 
@@ -26,7 +26,7 @@ pub struct Request {
     pub body: BodyType
 }
 
-pub(crate) type ReadyRequest = (Pin<Box<String>>, BodyType);
+pub(crate) type ReadyRequest = (Pin<Box<Bytes>>, BodyType);
 
 impl Request {
     pub async fn get_raw(&mut self) -> ReadyRequest {
@@ -52,7 +52,7 @@ impl Request {
         lines.push(String::from(""));
         lines.push(String::from(""));
 
-        let headers_raw = Pin::new(Box::new(lines.join(NEWLINE)));
+        let headers_raw = Pin::new(Box::new(Bytes::from(lines.join(NEWLINE))));
         (headers_raw, self.body.clone())
     }
 }
