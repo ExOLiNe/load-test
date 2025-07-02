@@ -1,17 +1,51 @@
-use std::env;
-use std::path::PathBuf;
+use std::collections::HashMap;
+use std::{env, fs};
+use std::path::{Path, PathBuf};
+use std::pin::Pin;
+use std::str::FromStr;
 use std::sync::Arc;
 use futures::future;
 use log::{debug};
 use tokio::fs::read_to_string;
 use http_client::client::HttpClient;
-use http_client::load_test_request::{LoadTestRequest, to_request};
-use http_client::request::Request;
+use http_client::request::{Method, Request};
 use anyhow::Result;
+use serde::Deserialize;
+use url::Url;
 
 #[cfg(feature = "dhat-heap")]
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
+
+#[derive(Deserialize, Debug)]
+pub struct LoadTestRequest {
+    pub request: RequestData,
+    pub repeats: usize,
+    pub max_connections: usize
+}
+
+#[derive(Deserialize, Debug)]
+pub struct RequestData {
+    pub query: String,
+    pub method: String,
+    pub headers: HashMap<String, String>,
+    pub body: Option<PathBuf>
+}
+
+pub fn to_request(data: &RequestData, working_dir: &Path) -> Result<Request> {
+    Ok(Request {
+        method: Method::from_str(&data.method)?,
+        url: Url::parse(&data.query)?,
+        headers: data.headers.clone(),
+        body: data.body.clone().map(|body| {
+            read_to_body(working_dir.join("body").join(body)).unwrap()
+        })
+    })
+}
+
+pub(crate) fn read_to_body(path: PathBuf) -> Result<Arc<Pin<String>>> {
+    Ok(Arc::new(Pin::new(fs::read_to_string(path)?)))
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {

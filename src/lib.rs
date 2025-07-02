@@ -5,7 +5,6 @@ pub mod request;
 pub mod connection;
 pub mod response_reader;
 pub mod header;
-pub mod load_test_request;
 pub mod utils;
 
 pub mod constants;
