@@ -106,7 +106,6 @@ impl Connection {
                                     Err(anyhow!(error))
                                 }
                             }
-
                         }
                     }
                 }

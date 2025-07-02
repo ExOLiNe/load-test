@@ -95,11 +95,11 @@ where T : AsyncBufRead + Unpin
                             Ok(HttpEntity::HeaderEnd)
                         } else {
                             let header_parsed: HttpHeader = header.try_into()?;
-                            if header_parsed.name == "Content-Length" {
+                            if header_parsed.name.eq_ignore_ascii_case("Content-Length") {
                                 let content_length: usize = header_parsed.value.parse()?;
                                 self.response_body_type = Plain((0, content_length));
                             }
-                            if header_parsed.name == "Transfer-Encoding" && header_parsed.value == "chunked" {
+                            if header_parsed.name.eq_ignore_ascii_case("Transfer-Encoding") && header_parsed.value.eq_ignore_ascii_case("chunked") {
                                 self.response_body_type = Chunked;
                             }
                             Ok(HttpEntity::Header(header_parsed))
@@ -195,27 +195,78 @@ where T : AsyncBufRead + Unpin
 
 #[cfg(test)]
 mod tests {
-    use log::debug;
-    use tokio::fs::File;
+    use std::{fs, io};
+    use std::path::Path;
+    use std::sync::Once;
+    use log::{debug};
     use tokio::io::BufReader;
-    use anyhow::Result;
+    use anyhow::{anyhow, Result};
+    use strum_macros::Display;
     use crate::response_reader::{HttpEntity, HttpResponseReader};
+    use crate::response_reader::tests::TestError::ResponseHasNotRead;
+
+    static INIT: Once = Once::new();
+
+    #[derive(Debug)]
+    struct TestCase {
+        name: String,
+        request: Option<String>,
+        response: Option<String>
+    }
+
+    #[derive(Debug, Display)]
+    enum TestError {
+        ResponseHasNotRead
+    }
+
+    fn load_test_case(dir: &Path) -> io::Result<TestCase> {
+        let request_path = dir.join("request");
+        let response_path = dir.join("response");
+
+        let name = dir
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_else(|| "<unknown>".to_string());
+
+        let request = fs::read_to_string(&request_path).ok();
+        let response = fs::read_to_string(&response_path).ok();
+
+        Ok(TestCase { name, request, response })
+    }
 
     #[tokio::test]
-    async fn response_reader_test() -> Result<()> {
-        env_logger::builder()
-            .filter(None, log::LevelFilter::Debug)
-            .format_timestamp_millis().init();
-        let file = File::open("test_resources/chunked_response.txt").await?;
-        let mut reader = HttpResponseReader::new(BufReader::new(file));
-        loop {
-            let entity = reader.next_entity().await?;
-            debug!("{:?}", entity);
-            if let HttpEntity::End = entity {
-                break;
+    async fn test_plain() -> Result<()> {
+        response_reader_test(load_test_case(Path::new("test_resources/plain"))?).await
+    }
+
+    #[tokio::test]
+    async fn test_chunked() -> Result<()> {
+        response_reader_test(load_test_case(Path::new("test_resources/chunked"))?).await
+    }
+
+    async fn response_reader_test(case: TestCase) -> Result<()> {
+        INIT.call_once(|| {
+            env_logger::builder()
+                .is_test(true)
+                .filter(None, log::LevelFilter::Debug)
+                .format_timestamp_millis().init();
+        });
+        let mut body_already_read = false;
+        if let Some(response) = case.response {
+            let mut reader = HttpResponseReader::new(BufReader::new(response.as_bytes()));
+            loop {
+                let entity = reader.next_entity().await?;
+                if let HttpEntity::Body(_) = entity {
+                    body_already_read = true;
+                }
+                if let HttpEntity::End = entity {
+                    if !body_already_read {
+                        return Err(anyhow!(ResponseHasNotRead));
+                    }
+                    break;
+                }
             }
         }
-        debug!("Finished");
         Ok(())
     }
 }
