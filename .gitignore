@@ -2,5 +2,6 @@
 .cargo
 .idea
 test_data
+test_resources
 openapi.json
 output.json
