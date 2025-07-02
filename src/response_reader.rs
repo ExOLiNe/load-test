@@ -193,8 +193,14 @@ where T : AsyncBufRead + Unpin
     }
 }
 
+#[cfg(test)]
 mod tests {
-    #[cfg(test)]
+    use log::debug;
+    use tokio::fs::File;
+    use tokio::io::BufReader;
+    use anyhow::Result;
+    use crate::response_reader::{HttpEntity, HttpResponseReader};
+
     #[tokio::test]
     async fn response_reader_test() -> Result<()> {
         env_logger::builder()
