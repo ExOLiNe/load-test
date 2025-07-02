@@ -12,7 +12,7 @@ use crate::response_reader::{HttpEntity, HttpResponseReader};
 use crate::utils::{ip_resolve, NEWLINE_BYTES};
 use crate::constants::IDLE_TIMEOUT;
 use crate::measure_time;
-use anyhow::{Result, Error};
+use anyhow::{Result, Error, anyhow};
 use crate::error::MyError;
 use crate::error::MyError::ConnectionClosedUnexpectedly;
 
@@ -92,18 +92,18 @@ impl Connection {
                     Err(error) => {
                         return match error.downcast::<MyError>() {
                             Ok(MyError::ZeroRead) => {
-                                Err(ConnectionClosedUnexpectedly.into())
+                                Err(anyhow!(ConnectionClosedUnexpectedly))
                             },
                             Ok(else_error) => {
-                                Err(else_error.into())
+                                Err(anyhow!(else_error))
                             }
                             Err(error) => {
                                 let idle = SystemTime::now().duration_since(last_packet_time)?;
                                 if idle > options.idle_timeout {
                                     warn!("Idle timeout");
-                                    Err(MyError::IdleTimeout.into())
+                                    Err(anyhow!(MyError::IdleTimeout))
                                 } else {
-                                    Err(error.into())
+                                    Err(anyhow!(error))
                                 }
                             }
 

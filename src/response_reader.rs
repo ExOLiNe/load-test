@@ -68,7 +68,7 @@ where T : AsyncBufRead + Unpin
                 let mut status_str = String::with_capacity(256);
                 match self.reader.read_line(&mut status_str).await {
                     Ok(0) => {
-                        Err(ConnectionClosedUnexpectedly.into())
+                        Err(anyhow!(ConnectionClosedUnexpectedly))
                     }
                     Ok(_) => {
                         self.state = ReaderState::Headers;
@@ -78,7 +78,7 @@ where T : AsyncBufRead + Unpin
                         Ok(HttpEntity::Status(status))
                     }
                     Err(e) => {
-                        Err(e.into())
+                        Err(anyhow!(e))
                     },
                 }
             },
@@ -106,7 +106,7 @@ where T : AsyncBufRead + Unpin
                         }
                     }
                     Err(e) => {
-                        Err(e.into())
+                        Err(anyhow!(e))
                     },
                 }
             }
@@ -129,7 +129,7 @@ where T : AsyncBufRead + Unpin
                 let to_read = content_length - already_read;
                 while self.buf.len() < to_read {
                     let read = self.reader.read_buf(&mut self.buf).await?;
-                    if read == 0 { return Err(ZeroRead.into()); }
+                    if read == 0 { return Err(anyhow!(ZeroRead)); }
                 }
                 let chunk = self.buf.split_to(to_read).freeze();
                 self.response_body_type = Plain((already_read + to_read, content_length));

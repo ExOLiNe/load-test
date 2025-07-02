@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use log::{info};
 use tokio::sync::Mutex;
 
-use anyhow::{Result};
+use anyhow::{anyhow, Result};
 use crate::error::MyError::IpResolve;
 
 pub struct Statistics {
@@ -63,5 +63,5 @@ pub(crate) fn ip_resolve(host: &str, port: u16) -> Result<SocketAddr> {
             return Ok(addr);
         }
     }
-    Err(IpResolve.into())
+    Err(anyhow!(IpResolve))
 }
