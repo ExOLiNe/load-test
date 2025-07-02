@@ -7,13 +7,14 @@ use tokio::sync::Mutex;
 use tokio_native_tls::{TlsConnector, TlsStream as TokioTlsStream};
 
 use crate::client::Response;
-use crate::error::{Error};
 use crate::request::ReadyRequest;
 use crate::response_reader::{HttpEntity, HttpResponseReader};
 use crate::utils::{ip_resolve, NEWLINE_BYTES};
 use crate::constants::IDLE_TIMEOUT;
-use crate::error::Error::ConnectionClosedUnexpectedly;
 use crate::measure_time;
+use anyhow::{Result, Error};
+use crate::error::MyError;
+use crate::error::MyError::ConnectionClosedUnexpectedly;
 
 type ResponseReader<T> = Arc<Mutex<HttpResponseReader<BufReader<ReadHalf<T>>>>>;
 
@@ -46,7 +47,7 @@ pub(crate) struct Connection {
 }
 
 impl Connection {
-    pub async fn write<T: AsyncWriteExt + Unpin>(writer: &mut T, request: &Arc<ReadyRequest>, in_progress: Arc<Mutex<bool>>) -> Result<(), Error> {
+    pub async fn write<T: AsyncWriteExt + Unpin>(writer: &mut T, request: &Arc<ReadyRequest>, in_progress: Arc<Mutex<bool>>) -> Result<()> {
         let mut in_progress = in_progress.lock().await;
         *in_progress = true;
         debug!("write headers: {:?}", request.0);
@@ -63,7 +64,7 @@ impl Connection {
         reader: ResponseReader<T>,
         in_progress: Arc<Mutex<bool>>,
         options: ConnectionOptions
-    ) -> Result<Response, Error>
+    ) -> Result<Response>
     where T: AsyncRead + Unpin + Send + 'static
     {
         let mut last_packet_time = SystemTime::now();
@@ -88,20 +89,24 @@ impl Connection {
                             _ => panic!("Invalid state")
                         }
                     },
-                    Err(err) => {
-                        return match err {
-                            Error::ZeroRead => {
-                                Err(ConnectionClosedUnexpectedly)
+                    Err(error) => {
+                        return match error.downcast::<MyError>() {
+                            Ok(MyError::ZeroRead) => {
+                                Err(ConnectionClosedUnexpectedly.into())
                             },
-                            _ => {
+                            Ok(else_error) => {
+                                Err(else_error.into())
+                            }
+                            Err(error) => {
                                 let idle = SystemTime::now().duration_since(last_packet_time)?;
                                 if idle > options.idle_timeout {
                                     warn!("Idle timeout");
-                                    Err(Error::IdleTimeout)
+                                    Err(MyError::IdleTimeout.into())
                                 } else {
-                                    Err(err)
+                                    Err(error.into())
                                 }
                             }
+
                         }
                     }
                 }
@@ -145,7 +150,7 @@ impl Connection {
         Ok(response)
     }
 
-    pub async fn send_request(&mut self, request: Arc<ReadyRequest>) -> Result<Response, Error> {
+    pub async fn send_request(&mut self, request: Arc<ReadyRequest>) -> Result<Response> {
         debug!("send request");
         match &mut self.writer {
             StreamWriter::Plain(writer) => {
@@ -168,7 +173,7 @@ impl Connection {
         Ok(response)
     }
 
-    pub async fn new(host: &str, port: u16, use_tls: bool, options: ConnectionOptions) -> Result<Connection, Error> {
+    pub async fn new(host: &str, port: u16, use_tls: bool, options: ConnectionOptions) -> Result<Connection> {
         let addr_v4 = measure_time!({
             ip_resolve(host, port)?
         });

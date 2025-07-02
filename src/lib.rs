@@ -1,7 +1,5 @@
 #![deny(unused_must_use)]
-//#![deny(unused_imports)]
 pub mod client;
-mod tests;
 pub mod error;
 pub mod request;
 pub mod connection;

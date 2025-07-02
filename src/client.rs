@@ -5,9 +5,10 @@ use tokio::sync::mpsc::Receiver;
 use url::Url;
 
 use crate::connection::{Connection, ConnectionOptions};
-use crate::error::{Error};
 use crate::header::HttpHeader;
 use crate::request::ReadyRequest;
+use anyhow::Result;
+use crate::error::MyError;
 
 #[derive(Debug)]
 pub struct Response {
@@ -39,7 +40,7 @@ impl HttpClient {
         &mut self,
         url: &Url,
         request: Arc<ReadyRequest>
-    ) -> Result<Response, Error> {
+    ) -> Result<Response> {
         let scheme = url.scheme();
         let host = url.host().expect("There must be domain").to_string();
         let use_tls = scheme == "https";
@@ -65,14 +66,19 @@ impl HttpClient {
         };
 
         match connection.send_request(request.clone()).await {
-            Err(Error::ConnectionClosedUnexpectedly) => {
-                self.connections.insert(
-                    url.to_string(),
-                    Connection::new(host.as_str(), port, use_tls, ConnectionOptions::default()).await?
-                );
-                self.connections.get_mut(url).unwrap().send_request(request).await
+            Err(error) => {
+                match error.downcast_ref::<MyError>() {
+                    Some(MyError::ConnectionClosedUnexpectedly) => {
+                        self.connections.insert(
+                            url.to_string(),
+                            Connection::new(host.as_str(), port, use_tls, ConnectionOptions::default()).await?
+                        );
+                        self.connections.get_mut(url).unwrap().send_request(request).await
+                    }
+                    _ => Err(error)
+                }
             },
-            something_else => something_else
+            Ok(response) => Ok(response)
         }
     }
 }

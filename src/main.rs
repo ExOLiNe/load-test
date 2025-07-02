@@ -5,17 +5,16 @@ use futures::future;
 use log::{debug};
 use tokio::fs::read_to_string;
 use http_client::client::HttpClient;
-use http_client::error::Error;
 use http_client::load_test_request::{LoadTestRequest, to_request};
 use http_client::request::Request;
-use http_client::utils::STATISTICS;
+use anyhow::Result;
 
 #[cfg(feature = "dhat-heap")]
 #[global_allocator]
 static ALLOC: dhat::Alloc = dhat::Alloc;
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> Result<()> {
     #[cfg(feature = "dhat-heap")]
     let _profiler = dhat::Profiler::new_heap();
 
@@ -80,6 +79,6 @@ async fn main() -> Result<(), Error> {
 
         println!("Time spent: {}", before.elapsed().unwrap().as_millis());
     }
-    STATISTICS.lock().await.print();
+    // STATISTICS.lock().await.print();
     Ok(())
 }

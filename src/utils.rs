@@ -4,7 +4,8 @@ use lazy_static::lazy_static;
 use log::{info};
 use tokio::sync::Mutex;
 
-use crate::error::Error;
+use anyhow::{Result};
+use crate::error::MyError::IpResolve;
 
 pub struct Statistics {
     times: HashMap<&'static str, (u128, u32)>,
@@ -55,14 +56,12 @@ macro_rules! measure_time {
 pub const NEWLINE: &str = "\r\n";
 pub const NEWLINE_BYTES: &[u8] = NEWLINE.as_bytes();
 
-pub(crate) fn ip_resolve(host: &str, port: u16) -> Result<SocketAddr, Error> {
-    let addrs_iter = (host, port).to_socket_addrs().map_err(
-        |err| Error::IpResolve(format!("{}", err))
-    )?;
+pub(crate) fn ip_resolve(host: &str, port: u16) -> Result<SocketAddr> {
+    let addrs_iter = (host, port).to_socket_addrs()?;
     for addr in addrs_iter {
         if addr.is_ipv4() {
             return Ok(addr);
         }
     }
-    Err(Error::IpResolve(String::from("Could not resolve as ip4")))
+    Err(IpResolve.into())
 }
